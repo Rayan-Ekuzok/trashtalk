@@ -1,26 +1,58 @@
 <template>
-  <img alt="Vue logo" src="./assets/logo.png">
-  <HelloWorld msg="Welcome to Your Vue.js App"/>
+  <NavBar 
+    :NavVar="NavVar" 
+    :user="user"
+    @ChangePage="ChangePage"
+  />
+
+  <Maps :NavVar="NavVar" :user="user" />
+  <LoginView 
+  :NavVar="NavVar" 
+  @loginSuccess="onLogin"
+  @changePage="ChangePage"
+/>
+
+  <!--<p>{{user}}</p> -->
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
+import NavBar from './components/NavBar.vue'
+import Maps from './components/Maps.vue'
+import LoginView from './components/Login.vue'
 
 export default {
-  name: 'App',
   components: {
-    HelloWorld
+    NavBar,
+    Maps,
+    LoginView
+  },
+
+  data() {
+    return {
+      NavVar: 0,
+      user: null
+    }
+  },
+
+ methods: {
+  ChangePage(a) {
+    this.NavVar = a
+  },
+
+    afterLogin() {
+      this.NavVar = 0
+    },
+     onLogin() {
+    const saved = localStorage.getItem('user')
+    this.user = JSON.parse(saved)
+    this.NavVar = 0
+  }
+  },
+  mounted() {
+  const saved = localStorage.getItem('user')
+  if (saved) {
+    this.user = JSON.parse(saved)
   }
 }
-</script>
-
-<style>
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
 }
-</style>
+</script>
