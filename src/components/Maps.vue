@@ -1,25 +1,63 @@
 <template>
-  <div class="container">
+  <div v-if="NavVar === 1" class="map-page">
 
-    <!-- MAP -->
-    <div v-if="NavVar === 1" id="map"></div>
+    <!-- CARTE -->
+    <div id="map"></div>
 
     <!-- SIDEBAR -->
-    <div class="sidebar" v-if="selectedEmplacement">
-      <h2>{{ selectedEmplacement.libelle }}</h2>
-      <p>Code postal : {{ selectedEmplacement.code_postal }}</p>
+    <div class="sidebar" :class="{ 'sidebar-open': selectedEmplacement }">
 
-      <hr>
+      <div v-if="!selectedEmplacement" class="sidebar-placeholder">
+        <span>📍</span>
+        <p>Cliquez sur un marqueur pour voir les contenants</p>
+      </div>
 
-      <h3>Contenants</h3>
+      <div v-else>
+        <div class="sidebar-header">
+          <div>
+            <h2>{{ selectedEmplacement.libelle }}</h2>
+            <p class="sidebar-cp">{{ selectedEmplacement.code_postal }}</p>
+          </div>
+          <button class="close-btn" @click="selectedEmplacement = null">✕</button>
+        </div>
 
-      <div v-for="c in contenantsFiltrés" :key="c.Id_contenant" class="box">
-        <p><b>ID :</b> {{ c.Id_contenant }}</p>
-        <p><b>Capacité :</b> {{ c.capacite_kg }} kg</p>
-        <p><b>Poids :</b> {{ c.poids_actuel_kg }} kg</p>
-        <p><b>Scellé :</b> {{ c.scelle ? 'Oui' : 'Non' }}</p>
-        <p><b>Type :</b> {{ getType(c.Id_type_dechet) }}</p>
-        <button @click="submit(c.Id_contenant)"> Ajouter du poids</button>
+        <div class="section-title">
+          <span class="dot dot-green"></span>
+          Contenants disponibles
+        </div>
+
+        <div v-if="contenantsFiltrés.length === 0" class="empty-state">
+          Aucun contenant disponible
+        </div>
+
+        <div v-for="c in contenantsFiltrés" :key="c.Id_contenant" class="contenant-card">
+          <div class="contenant-top">
+            <span class="contenant-id">#{{ c.Id_contenant }}</span>
+            <span class="contenant-type">{{ getType(c.Id_type_dechet) }}</span>
+            <span class="contenant-scelle" :class="c.scelle ? 'scelle-oui' : 'scelle-non'">
+              {{ c.scelle ? '🔒 Scellé' : '🔓 Ouvert' }}
+            </span>
+          </div>
+
+          <!-- Barre de remplissage -->
+          <div class="poids-bar-wrap">
+            <div class="poids-bar-label">
+              <span>{{ c.poids_actuel_kg }} kg / {{ c.capacite_kg }} kg</span>
+              <span class="poids-pct">{{ pct(c) }}%</span>
+            </div>
+            <div class="poids-bar-bg">
+              <div
+                class="poids-bar-fill"
+                :style="{ width: pct(c) + '%' }"
+                :class="pct(c) >= 80 ? 'bar-danger' : pct(c) >= 50 ? 'bar-warn' : 'bar-ok'"
+              ></div>
+            </div>
+          </div>
+
+          <button class="btn-ajouter" @click="submit(c.Id_contenant)">
+            + Ajouter du poids
+          </button>
+        </div>
       </div>
     </div>
 
@@ -30,23 +68,14 @@
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 
-
-
-
 export default {
-  
   name: 'MapsView',
-  
 
   props: {
     NavVar: Number
   },
 
   data() {
-
-    
-
-
     return {
       map: null,
       markers: [],
@@ -69,9 +98,7 @@ export default {
   watch: {
     NavVar(val) {
       if (val === 1) {
-        this.$nextTick(() => {
-          this.initMap()
-        })
+        this.$nextTick(() => this.initMap())
       } else {
         this.destroyMap()
       }
@@ -79,20 +106,12 @@ export default {
   },
 
   methods: {
-    
-
-    removeAtIndex(arr, index) {
-      if (!Array.isArray(arr)) {
-          throw new TypeError("First argument must be an array");
-      }
-      if (typeof index !== "number" || index < 0 || index >= arr.length) {
-          console.warn("Invalid index. No element removed.");
-          return arr; 
-      }
-      arr.splice(index, 1);
-      return arr;
+    pct(c) {
+      const p = parseFloat(c.poids_actuel_kg)
+      const cap = parseFloat(c.capacite_kg)
+      if (!cap) return 0
+      return Math.min(100, Math.round((p / cap) * 100))
     },
-
 
     async fetchAll() {
       const [e, c, t] = await Promise.all([
@@ -100,23 +119,18 @@ export default {
         fetch('http://localhost:3000/contenant').then(r => r.json()),
         fetch('http://localhost:3000/type_dechet').then(r => r.json())
       ])
-
       this.emplacements = e
       this.contenants = c
       this.types = t
     },
-
 
     getType(id) {
       const type = this.types.find(t => t.Id_type_dechet === id)
       return type ? type.libelle : 'Inconnu'
     },
 
-
     async initMap() {
-
       this.destroyMap()
-
       await this.fetchAll()
 
       this.map = L.map('map').setView([43.2965, 5.3698], 12)
@@ -131,40 +145,21 @@ export default {
         iconAnchor: [15, 30]
       })
 
-      this.emplacements.forEach((emplacement, index) => {
-        console.log( " Mon emplacement : " + emplacement + '  Mon index : ' + index);
-        var compteur = 0;
+      // Filtre : emplacements avec au moins un contenant non plein
+      const contenantsDispos = this.contenants.filter(
+        c => parseFloat(c.poids_actuel_kg) < parseFloat(c.capacite_kg)
+      )
+      const idsValides = new Set(contenantsDispos.map(c => c.Id_emplacement))
+      const emplacementsValides = this.emplacements.filter(e => idsValides.has(e.Id_emplacement))
 
-        this.contenants.forEach((contenant, index1) => {
-          
-          if (emplacement['Id_emplacement'] == contenant['Id_emplacement'] ) {
-            compteur++;
-          } if (contenant['capacite_kg'] <= contenant['poids_actuel_kg']) {
-            this.removeAtIndex(this.contenants, index1)
-          }
-
-        })
-
-        if (compteur == 0){
-            this.removeAtIndex(this.emplacements, index)
-          }
-      })
-
-      this.emplacements.forEach(e => {
+      emplacementsValides.forEach(e => {
         const marker = L.marker([e.latitude, e.longitude], { icon })
           .addTo(this.map)
-          .on('click', () => {
-            this.selectedEmplacement = e
-          })
-
+          .on('click', () => { this.selectedEmplacement = e })
         this.markers.push(marker)
       })
 
-      setTimeout(() => {
-        if (this.map) {
-          this.map.invalidateSize()
-        }
-      }, 150)
+      setTimeout(() => { if (this.map) this.map.invalidateSize() }, 150)
     },
 
     destroyMap() {
@@ -173,299 +168,228 @@ export default {
         this.map.remove()
         this.map = null
       }
-
       this.markers = []
       this.selectedEmplacement = null
-
       const el = document.getElementById('map')
       if (el) el.innerHTML = ''
-      },
+    },
 
     async submit(data1) {
-      console.log('envoie')
-
-
-      const url = 'http://localhost:3000/remplirpoubelle'
-
-      const body = 
-          {
-            id: data1
-          }
-
-
-      const res = await fetch(url, {
+      const res  = await fetch('http://localhost:3000/remplirpoubelle', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(body)
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: data1 })
       })
-
       const data = await res.json()
-
-      console.log(data)
-
-
-
+      if (data.success) {
+        // Met à jour le poids localement
+        const c = this.contenants.find(x => x.Id_contenant === data1)
+        if (c) c.poids_actuel_kg = data.poids_actuel_kg
+      }
     }
   }
 }
 </script>
 
 <style scoped>
-.container {
-  display: flex;
-}
-
-#map {
-  height: 500px;
-  width: 70%;
-}
-
-.sidebar {
-  width: 30%;
-  padding: 10px;
-  background: #f4f4f4;
-  overflow-y: auto;
-  height: 500px;
-}
-
-.box {
-  border: 1px solid #ccc;
-  margin-bottom: 10px;
-  padding: 8px;
-  background: white;
-}
-
 @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap');
 
-.admin-wrap {
+.map-page {
   font-family: 'IBM Plex Sans', sans-serif;
+  display: flex;
+  height: calc(100vh - 49px);
   background: #0f1117;
-  min-height: 100vh;
-  color: #e2e8f0;
-  padding: 32px;
+}
+
+/* ── CARTE ── */
+#map {
+  flex: 1;
+  min-width: 0;
+  z-index: 1;
+}
+
+/* ── SIDEBAR ── */
+.sidebar {
+  width: 340px;
+  min-width: 340px;
+  background: #0f1117;
+  border-left: 1px solid #2d3748;
+  overflow-y: auto;
+  padding: 20px;
   box-sizing: border-box;
-}
-
-.admin-header {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  border-bottom: 1px solid #2d3748;
-  padding-bottom: 24px;
-  margin-bottom: 36px;
-}
-
-.header-left {
-  display: flex;
-  align-items: center;
+  flex-direction: column;
   gap: 16px;
 }
 
-.header-icon {
-  font-size: 2rem;
-  background: #1e2330;
-  border: 1px solid #f6ad55;
-  border-radius: 10px;
-  padding: 10px 14px;
+.sidebar-placeholder {
+  text-align: center;
+  padding: 60px 20px;
+  color: #4a5568;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.85rem;
+  line-height: 1.6;
 }
 
-.admin-header h1 {
-  margin: 0;
-  font-size: 1.5rem;
+.sidebar-placeholder span {
+  display: block;
+  font-size: 2.5rem;
+  margin-bottom: 12px;
+}
+
+/* ── SIDEBAR HEADER ── */
+.sidebar-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding-bottom: 14px;
+  border-bottom: 1px solid #2d3748;
+}
+
+.sidebar-header h2 {
+  margin: 0 0 4px;
+  font-size: 1.1rem;
   font-weight: 600;
-  letter-spacing: -0.03em;
   color: #f7fafc;
 }
 
-.header-sub {
-  margin: 2px 0 0;
-  font-size: 0.8rem;
-  color: #718096;
+.sidebar-cp {
+  margin: 0;
   font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.75rem;
+  color: #718096;
 }
 
-.header-stats {
-  display: flex;
-  gap: 24px;
-}
-
-.stat {
-  text-align: center;
-  background: #1a1f2e;
+.close-btn {
+  background: none;
   border: 1px solid #2d3748;
-  border-radius: 10px;
-  padding: 12px 20px;
-}
-
-.stat-num {
-  display: block;
-  font-size: 1.6rem;
-  font-weight: 600;
-  color: #f6ad55;
-  font-family: 'IBM Plex Mono', monospace;
-}
-
-.stat-label {
-  font-size: 0.7rem;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
+  border-radius: 6px;
   color: #718096;
+  font-size: 0.8rem;
+  padding: 4px 8px;
+  cursor: pointer;
+  transition: color .15s, border-color .15s;
 }
 
+.close-btn:hover { color: #e2e8f0; border-color: #4a5568; }
+
+/* ── SECTION TITLE ── */
 .section-title {
-  font-size: 0.85rem;
+  font-size: 0.72rem;
   text-transform: uppercase;
   letter-spacing: 0.1em;
   color: #718096;
   display: flex;
   align-items: center;
   gap: 8px;
-  margin: 0 0 16px;
 }
 
-.dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
-.dot-orange { background: #f6ad55; box-shadow: 0 0 8px #f6ad55; }
-.dot-grey   { background: #4a5568; }
+.dot { width: 7px; height: 7px; border-radius: 50%; display: inline-block; }
+.dot-green { background: #48bb78; box-shadow: 0 0 6px #48bb78; }
 
-section { margin-bottom: 40px; }
-
-.cards-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-  gap: 16px;
+.empty-state {
+  text-align: center;
+  padding: 30px;
+  color: #4a5568;
+  font-size: 0.85rem;
+  font-family: 'IBM Plex Mono', monospace;
 }
 
-.card {
+/* ── CONTENANT CARD ── */
+.contenant-card {
   background: #1a1f2e;
   border: 1px solid #2d3748;
-  border-radius: 12px;
-  padding: 20px;
-  transition: border-color .2s, transform .15s;
-}
-
-.card:hover { border-color: #4a5568; transform: translateY(-2px); }
-.card-processing { opacity: 0.6; pointer-events: none; }
-.card-done { opacity: 0.7; }
-.card-valid    { border-left: 3px solid #48bb78; }
-.card-rejected { border-left: 3px solid #fc8181; }
-
-.card-top {
+  border-radius: 10px;
+  padding: 14px;
   display: flex;
-  align-items: center;
+  flex-direction: column;
   gap: 10px;
-  margin-bottom: 12px;
+  transition: border-color .2s;
 }
 
-.card-id {
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.75rem;
-  color: #f6ad55;
-  background: #2d2a1a;
-  border: 1px solid #f6ad5533;
-  border-radius: 4px;
-  padding: 2px 7px;
-}
+.contenant-card:hover { border-color: #4a5568; }
 
-.card-date {
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.7rem;
-  color: #4a5568;
-  margin-left: auto;
-}
-
-.card-text {
-  font-size: 0.95rem;
-  line-height: 1.5;
-  color: #cbd5e0;
-  margin: 0 0 16px;
-  border-left: 2px solid #2d3748;
-  padding-left: 10px;
-}
-
-.card-text-muted { color: #718096; }
-
-.card-meta { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
-
-.meta-item {
+.contenant-top {
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 0.82rem;
-  color: #a0aec0;
+  flex-wrap: wrap;
 }
 
-.meta-icon { font-size: 0.9rem; }
+.contenant-id {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.72rem;
+  color: #42b983;
+  background: #111827;
+  border: 1px solid #42b98333;
+  border-radius: 4px;
+  padding: 2px 6px;
+}
 
-.badge-warn {
+.contenant-type {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #a0aec0;
+  background: #111827;
+  border: 1px solid #2d3748;
+  border-radius: 4px;
+  padding: 2px 8px;
+}
+
+.contenant-scelle {
+  font-size: 0.72rem;
+  border-radius: 4px;
+  padding: 2px 7px;
+  margin-left: auto;
+}
+
+.scelle-oui { background: #2d2a1a; color: #f6ad55; border: 1px solid #f6ad5533; }
+.scelle-non { background: #1a2535; color: #63b3ed; border: 1px solid #63b3ed33; }
+
+/* ── BARRE DE POIDS ── */
+.poids-bar-wrap { display: flex; flex-direction: column; gap: 4px; }
+
+.poids-bar-label {
+  display: flex;
+  justify-content: space-between;
   font-family: 'IBM Plex Mono', monospace;
   font-size: 0.7rem;
-  background: #2d2a1a;
-  color: #f6ad55;
-  border: 1px solid #f6ad5544;
-  border-radius: 4px;
-  padding: 1px 5px;
-  margin-left: 6px;
+  color: #718096;
 }
 
-.badge-danger { background: #2d1a1a; color: #fc8181; border-color: #fc818144; }
+.poids-pct { color: #a0aec0; }
 
-.badge-ban {
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.65rem;
-  background: #fc8181;
-  color: #1a0a0a;
-  font-weight: 700;
-  border-radius: 4px;
-  padding: 1px 6px;
-  margin-left: 4px;
+.poids-bar-bg {
+  height: 6px;
+  background: #111827;
+  border-radius: 99px;
+  overflow: hidden;
 }
 
-.badge-result { font-size: 0.75rem; font-weight: 600; border-radius: 5px; padding: 2px 8px; }
-.badge-ok { background: #1a2d1f; color: #48bb78; border: 1px solid #48bb7844; }
-.badge-ko { background: #2d1a1a; color: #fc8181; border: 1px solid #fc818144; }
+.poids-bar-fill {
+  height: 100%;
+  border-radius: 99px;
+  transition: width .4s ease;
+}
 
-.card-actions { display: flex; gap: 10px; }
+.bar-ok     { background: #48bb78; }
+.bar-warn   { background: #f6ad55; }
+.bar-danger { background: #fc8181; }
 
-.btn {
-  flex: 1;
-  padding: 9px 0;
-  border: none;
-  border-radius: 8px;
+/* ── BOUTON ── */
+.btn-ajouter {
+  background: #1e2d1f;
+  color: #48bb78;
+  border: 1px solid #48bb7844;
+  border-radius: 7px;
+  padding: 8px;
   font-family: 'IBM Plex Sans', sans-serif;
-  font-size: 0.85rem;
+  font-size: 0.82rem;
   font-weight: 600;
   cursor: pointer;
-  transition: opacity .15s, transform .1s;
-}
-
-.btn:active { transform: scale(0.97); }
-.btn:disabled { opacity: 0.4; cursor: not-allowed; }
-.btn-valid  { background: #276749; color: #c6f6d5; }
-.btn-valid:hover:not(:disabled)  { background: #2f855a; }
-.btn-reject { background: #742a2a; color: #fed7d7; }
-.btn-reject:hover:not(:disabled) { background: #9b2c2c; }
-
-.feedback {
-  margin: 10px 0 0;
-  font-size: 0.8rem;
-  font-family: 'IBM Plex Mono', monospace;
-  border-radius: 6px;
-  padding: 6px 10px;
-}
-
-.feedback-ok   { background: #1a2d1f; color: #48bb78; }
-.feedback-warn { background: #2d2a1a; color: #f6ad55; }
-.feedback-err  { background: #2d1a1a; color: #fc8181; }
-
-.loading {
+  transition: background .15s;
   text-align: center;
-  color: #718096;
-  font-family: 'IBM Plex Mono', monospace;
-  padding: 60px 0;
 }
 
-.empty-state { text-align: center; padding: 60px; color: #48bb78; font-size: 1.1rem; }
-.empty-state span { display: block; font-size: 3rem; margin-bottom: 12px; }
+.btn-ajouter:hover { background: #276749; }
 </style>
