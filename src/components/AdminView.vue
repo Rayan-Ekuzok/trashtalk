@@ -136,6 +136,8 @@
 </template>
 
 <script>
+import { authHeaders } from '../composables/useAuth.js'
+
 export default {
   name: 'AdminView',
 
@@ -172,7 +174,7 @@ export default {
     async fetchSignalements() {
       this.loading = true
       try {
-        const res = await fetch('http://localhost:3000/signalement')
+        const res = await fetch('http://localhost:3000/signalement', { headers: authHeaders() })
         this.signalements = await res.json()
       } catch (e) {
         console.error(e)
@@ -186,7 +188,7 @@ export default {
       try {
         const res = await fetch('http://localhost:3000/signalement/valider', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: authHeaders(),
           body: JSON.stringify({ id_signalement: s.Id_signalement })
         })
         const data = await res.json()
@@ -211,7 +213,7 @@ export default {
       try {
         const res = await fetch('http://localhost:3000/signalement/rejeter', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: authHeaders(),
           body: JSON.stringify({ id_signalement: s.Id_signalement })
         })
         const data = await res.json()

@@ -139,6 +139,8 @@
 </template>
 
 <script>
+import { authHeaders } from '../composables/useAuth.js'
+
 export default {
   name: 'ConducteurView',
 
@@ -180,7 +182,7 @@ export default {
           ? 'http://localhost:3000/transferts/all'
           : `http://localhost:3000/conducteur/transferts/${this.user.Id_utilisateur}`
 
-        const res  = await fetch(url)
+        const res  = await fetch(url, { headers: authHeaders() })
         const data = await res.json()
         console.log('Transferts reçus :', data)
 

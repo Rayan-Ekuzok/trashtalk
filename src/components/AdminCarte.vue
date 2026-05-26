@@ -239,6 +239,8 @@
 </template>
 
 <script>
+import { authHeaders } from '../composables/useAuth.js'
+
 export default {
   name: 'AdminCarte',
 
@@ -337,7 +339,7 @@ export default {
       try {
         const res  = await fetch('http://localhost:3000/emplacement/ajouter', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: authHeaders(),
           body: JSON.stringify({ libelle, code_postal, latitude: parseFloat(latitude), longitude: parseFloat(longitude) })
         })
         const data = await res.json()
@@ -367,7 +369,7 @@ export default {
       try {
         const res  = await fetch('http://localhost:3000/contenant/ajouter', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: authHeaders(),
           body: JSON.stringify({
             capacite_kg:     parseInt(capacite_kg),
             poids_actuel_kg: parseFloat(poids_actuel_kg) || 0,
@@ -400,7 +402,7 @@ export default {
       try {
         const res  = await fetch('http://localhost:3000/contenant/assigner', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: authHeaders(),
           body: JSON.stringify({ Id_contenant: parseInt(Id_contenant), Id_emplacement: parseInt(Id_emplacement) })
         })
         const data = await res.json()

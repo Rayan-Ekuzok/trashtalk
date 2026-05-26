@@ -1,6 +1,5 @@
 <template>
   <div v-if="NavVar === 2" class="page-wrap">
-
     <div class="login-box">
       <div class="login-header">
         <span class="login-icon">{{ isRegister ? '✦' : '⬡' }}</span>
@@ -23,8 +22,8 @@
         <input v-model="icon" placeholder="URL d'une image" />
       </div>
 
-      <button class="btn-primary" @click="submit">
-        {{ isRegister ? 'Créer le compte' : 'Se connecter' }}
+      <button class="btn-primary" :disabled="loading" @click="submit">
+        {{ loading ? '…' : isRegister ? 'Créer le compte' : 'Se connecter' }}
       </button>
 
       <button class="btn-secondary" @click="toggleMode">
@@ -33,48 +32,33 @@
 
       <p v-if="message" class="message" :class="messageClass">{{ message }}</p>
     </div>
-
   </div>
 </template>
 
 <script>
 export default {
   name: 'LoginView',
-
-  props: {
-    NavVar: Number
-  },
+  props: { NavVar: Number },
 
   data() {
-    return {
-      login: '',
-      password: '',
-      icon: '',
-      message: '',
-      isRegister: false
-    }
+    return { login: '', password: '', icon: '', message: '', isRegister: false, loading: false }
   },
 
   computed: {
     messageClass() {
       if (!this.message) return ''
-      if (this.message.includes('✔')) return 'msg-ok'
-      return 'msg-err'
+      return this.message.includes('✔') ? 'msg-ok' : 'msg-err'
     }
   },
 
   methods: {
-    toggleMode() {
-      this.isRegister = !this.isRegister
-      this.message = ''
-    },
+    toggleMode() { this.isRegister = !this.isRegister; this.message = '' },
 
     async submit() {
+      this.loading = true
+      this.message = ''
       try {
-        const url = this.isRegister
-          ? 'http://localhost:3000/register'
-          : 'http://localhost:3000/login'
-
+        const url  = this.isRegister ? 'http://localhost:3000/register' : 'http://localhost:3000/login'
         const body = this.isRegister
           ? { login: this.login, password: this.password, icon: this.icon }
           : { login: this.login, password: this.password }
@@ -84,20 +68,21 @@ export default {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(body)
         })
-
         const data = await res.json()
 
         if (data.success) {
           this.message = this.isRegister ? "Compte créé ✔" : "Connexion réussie ✔"
           if (!this.isRegister) {
-            localStorage.setItem('user', JSON.stringify(data.user))
-            this.$emit('loginSuccess')
+            // Émet token + user vers App.vue
+            this.$emit('loginSuccess', { token: data.token, user: data.user })
           }
         } else {
           this.message = data.message || "Erreur"
         }
-      } catch (e) {
+      } catch {
         this.message = "Erreur serveur"
+      } finally {
+        this.loading = false
       }
     }
   }
@@ -130,11 +115,7 @@ export default {
   gap: 18px;
 }
 
-/* ── HEADER ── */
-.login-header {
-  text-align: center;
-  margin-bottom: 8px;
-}
+.login-header { text-align: center; margin-bottom: 8px; }
 
 .login-icon {
   display: inline-block;
@@ -147,27 +128,10 @@ export default {
   color: #42b983;
 }
 
-.login-header h1 {
-  margin: 0 0 4px;
-  font-size: 1.4rem;
-  font-weight: 600;
-  letter-spacing: -0.03em;
-  color: #f7fafc;
-}
+.login-header h1 { margin: 0 0 4px; font-size: 1.4rem; font-weight: 600; letter-spacing: -0.03em; color: #f7fafc; }
+.login-sub       { margin: 0; font-size: 0.8rem; color: #718096; font-family: 'IBM Plex Mono', monospace; }
 
-.login-sub {
-  margin: 0;
-  font-size: 0.8rem;
-  color: #718096;
-  font-family: 'IBM Plex Mono', monospace;
-}
-
-/* ── FORM ── */
-.form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
+.form-group { display: flex; flex-direction: column; gap: 6px; }
 
 .form-group label {
   font-size: 0.78rem;
@@ -176,11 +140,7 @@ export default {
   color: #718096;
 }
 
-.optional {
-  color: #4a5568;
-  text-transform: none;
-  font-size: 0.75rem;
-}
+.optional { color: #4a5568; text-transform: none; font-size: 0.75rem; }
 
 .form-group input {
   background: #111827;
@@ -194,15 +154,9 @@ export default {
   transition: border-color .2s;
 }
 
-.form-group input:focus {
-  border-color: #42b983;
-}
+.form-group input:focus    { border-color: #42b983; }
+.form-group input::placeholder { color: #4a5568; }
 
-.form-group input::placeholder {
-  color: #4a5568;
-}
-
-/* ── BOUTONS ── */
 .btn-primary {
   background: #276749;
   color: #c6f6d5;
@@ -213,12 +167,12 @@ export default {
   font-size: 0.9rem;
   font-weight: 600;
   cursor: pointer;
-  transition: background .15s, transform .1s;
+  transition: background .15s;
   margin-top: 4px;
 }
 
-.btn-primary:hover  { background: #2f855a; }
-.btn-primary:active { transform: scale(0.98); }
+.btn-primary:hover:not(:disabled) { background: #2f855a; }
+.btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
 
 .btn-secondary {
   background: transparent;
@@ -234,7 +188,6 @@ export default {
 
 .btn-secondary:hover { color: #a0aec0; border-color: #4a5568; }
 
-/* ── MESSAGE ── */
 .message {
   margin: 0;
   font-size: 0.82rem;
