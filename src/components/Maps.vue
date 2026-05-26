@@ -54,9 +54,7 @@
             </div>
           </div>
 
-          <button class="btn-ajouter" @click="submit(c.Id_contenant)">
-            + Ajouter du poids
-          </button>
+
         </div>
       </div>
     </div>

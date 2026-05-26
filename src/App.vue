@@ -6,11 +6,12 @@
     @logout="onLogout"
   />
 
-  <AccueilView     :NavVar="NavVar" :user="user" @ChangePage="ChangePage" />
-  <Maps            :NavVar="NavVar" :user="user" />
-  <LoginView       :NavVar="NavVar" @loginSuccess="onLogin" @changePage="ChangePage" />
-  <AdminView       :NavVar="NavVar" :user="user" />
-  <ConducteurView  :NavVar="NavVar" :user="user" />
+  <AccueilView    :NavVar="NavVar" :user="user" @ChangePage="ChangePage" />
+  <Maps           :NavVar="NavVar" :user="user" />
+  <LoginView      :NavVar="NavVar" @loginSuccess="onLogin" @changePage="ChangePage" />
+  <AdminView      :NavVar="NavVar" :user="user" />
+  <ConducteurView :NavVar="NavVar" :user="user" />
+  <AdminCarte     :NavVar="NavVar" :user="user" />
 </template>
 
 <script>
@@ -20,26 +21,21 @@ import Maps           from './components/Maps.vue'
 import LoginView      from './components/Login.vue'
 import AdminView      from './components/AdminView.vue'
 import ConducteurView from './components/ConducteurView.vue'
+import AdminCarte     from './components/AdminCarte.vue'
 
 export default {
-  components: { NavBar, AccueilView, Maps, LoginView, AdminView, ConducteurView },
+  components: { NavBar, AccueilView, Maps, LoginView, AdminView, ConducteurView, AdminCarte },
 
   data() {
-    return {
-      NavVar: 0,
-      user: null
-    }
+    return { NavVar: 0, user: null }
   },
 
   methods: {
     ChangePage(a) { this.NavVar = a },
-
     onLogin() {
-      const saved = localStorage.getItem('user')
-      this.user = JSON.parse(saved)
+      this.user = JSON.parse(localStorage.getItem('user'))
       this.NavVar = 0
     },
-
     onLogout() {
       this.user = null
       this.NavVar = 0
