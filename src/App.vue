@@ -5,14 +5,12 @@
     @ChangePage="ChangePage"
     @logout="onLogout"
   />
-
   <AccueilView    :NavVar="NavVar" :user="user" @ChangePage="ChangePage" />
   <Maps           :NavVar="NavVar" :user="user" />
   <LoginView      :NavVar="NavVar" @loginSuccess="onLogin" @changePage="ChangePage" />
   <AdminView      :NavVar="NavVar" :user="user" />
   <ConducteurView :NavVar="NavVar" :user="user" />
   <AdminCarte     :NavVar="NavVar" :user="user" />
-
   <!-- Popup session expirée -->
   <div v-if="sessionExpired" class="session-overlay">
     <div class="session-popup">
@@ -23,7 +21,7 @@
     </div>
   </div>
 </template>
-
+ 
 <script>
 import NavBar         from './components/NavBar.vue'
 import AccueilView    from './components/Accueil.vue'
@@ -32,12 +30,10 @@ import LoginView      from './components/Login.vue'
 import AdminView      from './components/AdminView.vue'
 import ConducteurView from './components/ConducteurView.vue'
 import AdminCarte     from './components/AdminCarte.vue'
-
-import { saveSession, clearSession, startSessionWatch, stopSessionWatch, getToken } from './composables/useAuth.js'
-
+import { saveSession, clearSession, startSessionWatch, stopSessionWatch, getToken, isTokenValid } from './composables/useAuth.js'
+ 
 export default {
   components: { NavBar, AccueilView, Maps, LoginView, AdminView, ConducteurView, AdminCarte },
-
   data() {
     return {
       NavVar: 0,
@@ -45,10 +41,8 @@ export default {
       sessionExpired: false
     }
   },
-
   methods: {
     ChangePage(a) { this.NavVar = a },
-
     onLogin({ token, user }) {
       saveSession(token, user)
       this.user = user
@@ -57,28 +51,32 @@ export default {
       // Démarre la surveillance d'inactivité
       startSessionWatch(() => this.onSessionExpired())
     },
-
     onLogout() {
       stopSessionWatch()
       clearSession()
       this.user = null
       this.NavVar = 0
     },
-
     onSessionExpired() {
       this.user = null
       this.NavVar = 0
       this.sessionExpired = true
     }
   },
-
   mounted() {
     const saved = localStorage.getItem('user')
     const token = getToken()
+ 
     if (saved && token) {
-      this.user = JSON.parse(saved)
-      // Relance la surveillance si l'utilisateur recharge la page
-      startSessionWatch(() => this.onSessionExpired())
+      if (!isTokenValid()) {
+        // Token expiré pendant l'absence → nettoyage immédiat + popup
+        clearSession()
+        this.sessionExpired = true
+      } else {
+        // Token encore valide → on restaure la session normalement
+        this.user = JSON.parse(saved)
+        startSessionWatch(() => this.onSessionExpired())
+      }
     }
   }
 }

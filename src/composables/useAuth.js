@@ -35,6 +35,13 @@ export function getToken() {
   return localStorage.getItem('token')
 }
 
+// ── Vérifie si le token stocké est encore valide ─────────────────────────────
+export function isTokenValid() {
+  const token = getToken()
+  if (!token) return false
+  return msUntilExpiry(token) > 0
+}
+
 // ── Sauvegarde token + user ───────────────────────────────────────────────────
 export function saveSession(token, user) {
   localStorage.setItem('token', token)
