@@ -1,205 +1,66 @@
 <template>
-  <div v-if="NavVar === 2" class="page-wrap">
-    <div class="login-box">
-      <div class="login-header">
-        <span class="login-icon">{{ isRegister ? '✦' : '⬡' }}</span>
-        <h1>{{ isRegister ? 'Créer un compte' : 'Connexion' }}</h1>
-        <p class="login-sub">{{ isRegister ? 'Rejoindre TrashTalk' : 'Bon retour parmi nous' }}</p>
+  <div v-if="nav === 2" class="page-center">
+    <div class="boite">
+      <div class="boite_entete">
+        <span class="boite_icone">{{ estInscription ? '✦' : '⬡' }}</span>
+        <h1 class="boite_titre">{{ estInscription ? 'Créer un compte' : 'Connexion' }}</h1>
+        <p class="boite_sous-titre">{{ estInscription ? 'Rejoindre TrashTalk' : 'Bon retour parmi nous' }}</p>
       </div>
 
-      <div class="form-group">
-        <label>Login</label>
-        <input v-model="login" placeholder="Votre identifiant" autocomplete="username" />
+      <div class="champ">
+        <label class="champ_label">Login</label>
+        <input class="champ_input" v-model="login" placeholder="Votre identifiant" autocomplete="username" />
+      </div>
+      <div class="champ">
+        <label class="champ_label">Mot de passe</label>
+        <input class="champ_input" v-model="pwd" type="password" placeholder="••••••••" autocomplete="current-password" />
+      </div>
+      <div v-if="estInscription" class="champ">
+        <label class="champ_label">Avatar <span class="champ_opt">(optionnel)</span></label>
+        <input class="champ_input" v-model="icon" placeholder="URL d'une image" />
       </div>
 
-      <div class="form-group">
-        <label>Mot de passe</label>
-        <input v-model="password" type="password" placeholder="••••••••" autocomplete="current-password" />
-      </div>
-
-      <div v-if="isRegister" class="form-group">
-        <label>Avatar <span class="optional">(optionnel)</span></label>
-        <input v-model="icon" placeholder="URL d'une image" />
-      </div>
-
-      <button class="btn-primary" :disabled="loading" @click="submit">
-        {{ loading ? '…' : isRegister ? 'Créer le compte' : 'Se connecter' }}
+      <button class="btn-principal" :disabled="chargement" @click="soumettre">
+        {{ chargement ? '…' : estInscription ? 'Créer le compte' : 'Se connecter' }}
+      </button>
+      <button class="btn-secondaire" @click="basculer">
+        {{ estInscription ? '← Retour à la connexion' : 'Pas encore de compte ?' }}
       </button>
 
-      <button class="btn-secondary" @click="toggleMode">
-        {{ isRegister ? '← Retour à la connexion' : 'Pas encore de compte ?' }}
-      </button>
-
-      <p v-if="message" class="message" :class="messageClass">{{ message }}</p>
+      <p v-if="msg" class="message" :class="msg.includes('✔') ? 'message-succes' : 'message-erreur'">{{ msg }}</p>
     </div>
   </div>
 </template>
 
 <script>
 export default {
-  name: 'LoginView',
-  props: { NavVar: Number },
-
+  // eslint-disable-next-line
+  name: 'Connexion',
+  props: { nav: Number },
+  emits: ['ok'],
   data() {
-    return { login: '', password: '', icon: '', message: '', isRegister: false, loading: false }
+    return { login: '', pwd: '', icon: '', msg: '', estInscription: false, chargement: false }
   },
-
-  computed: {
-    messageClass() {
-      if (!this.message) return ''
-      return this.message.includes('✔') ? 'msg-ok' : 'msg-err'
-    }
-  },
-
   methods: {
-    toggleMode() { this.isRegister = !this.isRegister; this.message = '' },
-
-    async submit() {
-      this.loading = true
-      this.message = ''
+    basculer() { this.estInscription = !this.estInscription; this.msg = '' },
+    async soumettre() {
+      this.chargement = true; this.msg = ''
       try {
-        const url  = this.isRegister ? 'http://localhost:3000/register' : 'http://localhost:3000/login'
-        const body = this.isRegister
-          ? { login: this.login, password: this.password, icon: this.icon }
-          : { login: this.login, password: this.password }
-
-        const res  = await fetch(url, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(body)
-        })
+        const url  = this.estInscription ? 'http://localhost:3000/register' : 'http://localhost:3000/login'
+        const body = this.estInscription
+          ? { login: this.login, password: this.pwd, icon: this.icon }
+          : { login: this.login, password: this.pwd }
+        const res  = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
         const data = await res.json()
-
         if (data.success) {
-          this.message = this.isRegister ? "Compte créé ✔" : "Connexion réussie ✔"
-          if (!this.isRegister) {
-            // Émet token + user vers App.vue
-            this.$emit('loginSuccess', { token: data.token, user: data.user })
-          }
+          this.msg = this.estInscription ? 'Compte créé' : 'Connexion réussie'
+          if (!this.estInscription) this.$emit('ok', { token: data.token, user: data.user })
         } else {
-          this.message = data.message || "Erreur"
+          this.msg = data.message || 'Erreur'
         }
-      } catch {
-        this.message = "Erreur serveur"
-      } finally {
-        this.loading = false
-      }
+      } catch { this.msg = 'Erreur serveur' }
+      finally  { this.chargement = false }
     }
   }
 }
 </script>
-
-<style scoped>
-@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap');
-
-.page-wrap {
-  font-family: 'IBM Plex Sans', sans-serif;
-  background: #0f1117;
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 32px;
-  box-sizing: border-box;
-}
-
-.login-box {
-  width: 100%;
-  max-width: 400px;
-  background: #1a1f2e;
-  border: 1px solid #2d3748;
-  border-radius: 16px;
-  padding: 40px 36px;
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
-}
-
-.login-header { text-align: center; margin-bottom: 8px; }
-
-.login-icon {
-  display: inline-block;
-  font-size: 2rem;
-  background: #111827;
-  border: 1px solid #2d3748;
-  border-radius: 12px;
-  padding: 10px 16px;
-  margin-bottom: 14px;
-  color: #42b983;
-}
-
-.login-header h1 { margin: 0 0 4px; font-size: 1.4rem; font-weight: 600; letter-spacing: -0.03em; color: #f7fafc; }
-.login-sub       { margin: 0; font-size: 0.8rem; color: #718096; font-family: 'IBM Plex Mono', monospace; }
-
-.form-group { display: flex; flex-direction: column; gap: 6px; }
-
-.form-group label {
-  font-size: 0.78rem;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: #718096;
-}
-
-.optional { color: #4a5568; text-transform: none; font-size: 0.75rem; }
-
-.form-group input {
-  background: #111827;
-  border: 1px solid #2d3748;
-  border-radius: 8px;
-  padding: 10px 14px;
-  color: #e2e8f0;
-  font-family: 'IBM Plex Sans', sans-serif;
-  font-size: 0.9rem;
-  outline: none;
-  transition: border-color .2s;
-}
-
-.form-group input:focus    { border-color: #42b983; }
-.form-group input::placeholder { color: #4a5568; }
-
-.btn-primary {
-  background: #276749;
-  color: #c6f6d5;
-  border: none;
-  border-radius: 8px;
-  padding: 12px;
-  font-family: 'IBM Plex Sans', sans-serif;
-  font-size: 0.9rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background .15s;
-  margin-top: 4px;
-}
-
-.btn-primary:hover:not(:disabled) { background: #2f855a; }
-.btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
-
-.btn-secondary {
-  background: transparent;
-  color: #718096;
-  border: 1px solid #2d3748;
-  border-radius: 8px;
-  padding: 10px;
-  font-family: 'IBM Plex Sans', sans-serif;
-  font-size: 0.85rem;
-  cursor: pointer;
-  transition: color .15s, border-color .15s;
-}
-
-.btn-secondary:hover { color: #a0aec0; border-color: #4a5568; }
-
-.message {
-  margin: 0;
-  font-size: 0.82rem;
-  font-family: 'IBM Plex Mono', monospace;
-  text-align: center;
-  border-radius: 6px;
-  padding: 8px 12px;
-  background: #111827;
-  border: 1px solid #2d3748;
-  color: #718096;
-}
-
-.msg-ok  { background: #1a2d1f; color: #48bb78; border-color: #48bb7844; }
-.msg-err { background: #2d1a1a; color: #fc8181; border-color: #fc818144; }
-</style>

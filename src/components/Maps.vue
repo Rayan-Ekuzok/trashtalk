@@ -1,46 +1,68 @@
 <template>
-  <div v-if="NavVar === 1" class="map-page">
-    <div id="map"></div>
+  <div v-if="nav === 1" class="page-carte">
+    <div id="carte-leaflet"></div>
 
-    <div class="sidebar">
-      <div v-if="!selectedEmplacement" class="sidebar-placeholder">
+    <div class="panneau-lateral">
+      <div v-if="!selection" class="panneau-lateral-vide">
         <span>📍</span>
         <p>Cliquez sur un marqueur pour voir les contenants</p>
       </div>
 
       <div v-else>
-        <div class="sidebar-header">
+        <div class="panneau-lateral-entete">
           <div>
-            <h2>{{ selectedEmplacement.libelle }}</h2>
-            <p class="sidebar-cp">{{ selectedEmplacement.code_postal }}</p>
+            <h2>{{ selection.libelle }}</h2>
+            <p class="panneau-lateral-cp">{{ selection.code_postal }}</p>
           </div>
-          <button class="close-btn" @click="selectedEmplacement = null">✕</button>
+          <button class="panneau-lateral-fermer" @click="selection = null">✕</button>
         </div>
 
-        <div class="section-title"><span class="dot dot-green"></span>Contenants disponibles</div>
+        <h2 class="section-titre"><span class="point point-vert"></span>Contenants disponibles</h2>
 
-        <div v-if="contenantsFiltrés.length === 0" class="empty-state">Aucun contenant disponible</div>
+        <div v-if="!contenantsFiltres.length" class="aucun">Aucun contenant disponible</div>
 
-        <div v-for="c in contenantsFiltrés" :key="c.Id_contenant" class="contenant-card">
-          <div class="contenant-top">
-            <span class="contenant-id">#{{ c.Id_contenant }}</span>
-            <span class="contenant-type">{{ getType(c.Id_type_dechet) }}</span>
-            <span class="contenant-scelle" :class="c.scelle ? 'scelle-oui' : 'scelle-non'">
-              {{ c.scelle ? '🔒 Scellé' : '🔓 Ouvert' }}
+        <div v-for="c in contenantsFiltres" :key="c.Id_contenant" class="contenant-carte">
+          <div class="contenant-carte_entete">
+            <span class="carte-item_id">#{{ c.Id_contenant }}</span>
+            <span class="contenant-carte-type">{{ getType(c.Id_type_dechet) }}</span>
+            <span class="contenant-carte-scelle" :class="c.scelle ? 'contenant-carte_scelle-ferme' : 'contenant-carte_scelle-ouvert'">
+              {{ c.scelle ? 'Scellé' : 'Ouvert' }}
             </span>
           </div>
-          <div class="poids-bar-wrap">
-            <div class="poids-bar-label">
+          <div class="contenant-carte-barre">
+            <div class="barre-legende">
               <span>{{ c.poids_actuel_kg }} kg / {{ c.capacite_kg }} kg</span>
-              <span class="poids-pct">{{ pct(c) }}%</span>
+              <span>{{ pct(c) }}%</span>
             </div>
-            <div class="poids-bar-bg">
-              <div class="poids-bar-fill" :style="{ width: pct(c) + '%' }"
-                :class="pct(c) >= 80 ? 'bar-danger' : pct(c) >= 50 ? 'bar-warn' : 'bar-ok'"></div>
+            <div class="barre-fond">
+              <div class="barre-remplissage"
+                :style="{ width: pct(c) + '%' }"
+                :class="pct(c) >= 80 ? 'barre-remplissage-plein' : pct(c) >= 50 ? 'barre-remplissage-mid' : 'barre-remplissage-ok'">
+              </div>
             </div>
           </div>
-          <button class="btn-ajouter" @click="submit(c.Id_contenant)">+ Ajouter du poids</button>
+          <button v-if="user" class="btn-signaler" @click="ouvrirSignalement(c.Id_emplacement)">🚨 Signaler un problème</button>
         </div>
+      </div>
+    </div>
+
+    <!-- Modal signalement -->
+    <div v-if="modalSignalement" class="overlay" @click.self="modalSignalement = false">
+      <div class="popup">
+        <span class="popup-icone">🚨</span>
+        <h2 class="popup-titre">Signaler un problème</h2>
+        <p class="popup-texte">Emplacement #{{ signalementContenantId }}</p>
+        <div class="champ" style="width:100%; text-align:left">
+          <label class="champ-label">Description</label>
+          <textarea class="popup-textarea" v-model="signalementTexte" placeholder="Décrivez le problème…" rows="4"></textarea>
+        </div>
+        <div class="popup_actions">
+          <button class="btn-rejeter" @click="modalSignalement = false">Annuler</button>
+          <button class="btn-valider" :disabled="signalementChargement || !signalementTexte.trim()" @click="envoyerSignalement">
+            {{ signalementChargement ? '…' : 'Envoyer' }}
+          </button>
+        </div>
+        <p v-if="signalementMsg" class="message" :class="signalementMsg.ok ? 'message-succes' : 'message-erreur'">{{ signalementMsg.txt }}</p>
       </div>
     </div>
   </div>
@@ -49,86 +71,122 @@
 <script>
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
-import { authHeaders } from '../composables/useAuth.js'
 
 export default {
-  name: 'MapsView',
-  props: { NavVar: Number },
-
+  name: 'CarteInteractive',
+  props: { nav: Number, user: Object },
   data() {
-    return { map: null, markers: [], emplacements: [], contenants: [], types: [], selectedEmplacement: null }
+    return {
+      carte: null, marqueurs: [], emplacements: [], contenants: [], types: [], selection: null,
+      modalSignalement: false, signalementContenantId: null, signalementTexte: '',
+      signalementChargement: false, signalementMsg: null
+    }
   },
-
   computed: {
-    contenantsFiltrés() {
-      if (!this.selectedEmplacement) return []
-      return this.contenants.filter(c => c.Id_emplacement === this.selectedEmplacement.Id_emplacement)
+    contenantsFiltres() {
+      if (!this.selection) return []
+      return this.contenants.filter(c => c.Id_emplacement === this.selection.Id_emplacement)
     }
   },
-
   watch: {
-    NavVar(val) {
-      if (val === 1) this.$nextTick(() => this.initMap())
-      else this.destroyMap()
+    nav(v) {
+      if (v === 1) this.$nextTick(() => this.initialiser())
+      else this.detruire()
     }
   },
-
   methods: {
     pct(c) {
       const p = parseFloat(c.poids_actuel_kg), cap = parseFloat(c.capacite_kg)
       return cap ? Math.min(100, Math.round((p / cap) * 100)) : 0
     },
-
-    async fetchAll() {
-      // emplacement et type_dechet sont publics, contenant est protégé
+    getType(id) {
+      const t = this.types.find(t => t.Id_type_dechet === id)
+      return t ? t.libelle : 'Inconnu'
+    },
+    ouvrirSignalement(id) {
+      this.signalementContenantId = id
+      this.signalementTexte = ''
+      this.signalementMsg = null
+      this.modalSignalement = true
+    },
+    async envoyerSignalement() {
+      this.signalementChargement = true
+      this.signalementMsg = null
+      try {
+        const res  = await fetch('http://localhost:3000/signalement/creer', {
+          method: 'POST',
+          headers: this.$auth(),
+          body: JSON.stringify({ Id_emplacement: this.signalementContenantId, text: this.signalementTexte })
+        })
+        const data = await res.json()
+        if (data.success) {
+          this.signalementMsg = { ok: true, txt: 'Signalement envoyé' }
+          this.signalementTexte = ''
+          setTimeout(() => { this.modalSignalement = false; this.signalementMsg = null }, 1500)
+        } else {
+          this.signalementMsg = { ok: false, txt: data.message || 'Erreur' }
+        }
+      } catch { this.signalementMsg = { ok: false, txt: 'Erreur serveur' } }
+      finally  { this.signalementChargement = false }
+    },
+    async chargerDonnees() {
       const [e, c, t] = await Promise.all([
         fetch('http://localhost:3000/emplacement').then(r => r.json()),
-        fetch('http://localhost:3000/contenant', { headers: authHeaders() }).then(r => r.json()),
+        fetch('http://localhost:3000/contenant', { headers: this.$auth() }).then(r => r.json()),
         fetch('http://localhost:3000/type_dechet').then(r => r.json())
       ])
       this.emplacements = Array.isArray(e) ? e : []
       this.contenants   = Array.isArray(c) ? c : []
       this.types        = Array.isArray(t) ? t : []
     },
+    async initialiser() {
+      this.detruire()
+      await this.chargerDonnees()
 
-    getType(id) {
-      const t = this.types.find(t => t.Id_type_dechet === id)
-      return t ? t.libelle : 'Inconnu'
-    },
-
-    async initMap() {
-      this.destroyMap()
-      await this.fetchAll()
-
-      this.map = L.map('map').setView([43.2965, 5.3698], 12)
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '&copy; OpenStreetMap' }).addTo(this.map)
-
-      const icon = L.icon({ iconUrl: 'https://cdn-icons-png.flaticon.com/512/484/484662.png', iconSize: [30, 30], iconAnchor: [15, 30] })
-
-      const contenantsDispos = this.contenants.filter(c => parseFloat(c.poids_actuel_kg) < parseFloat(c.capacite_kg))
-      const idsValides = new Set(contenantsDispos.map(c => c.Id_emplacement))
-
-      this.emplacements.filter(e => idsValides.has(e.Id_emplacement)).forEach(e => {
-        const marker = L.marker([e.latitude, e.longitude], { icon })
-          .addTo(this.map).on('click', () => { this.selectedEmplacement = e })
-        this.markers.push(marker)
+      // Fix icônes par défaut Leaflet cassées avec Vite/Webpack
+      delete L.Icon.Default.prototype._getIconUrl
+      L.Icon.Default.mergeOptions({
+        iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
+        iconUrl:       'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+        shadowUrl:     'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
       })
 
-      setTimeout(() => { if (this.map) this.map.invalidateSize() }, 150)
-    },
+      this.carte = L.map('carte-leaflet').setView([43.2965, 5.3698], 12)
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap'
+      }).addTo(this.carte)
 
-    destroyMap() {
-      if (this.map) { this.map.off(); this.map.remove(); this.map = null }
-      this.markers = []; this.selectedEmplacement = null
-      const el = document.getElementById('map')
+      // "icon" (pas "icone") — propriété reconnue par Leaflet
+      const icon = L.icon({
+        iconUrl:    'https://cdn-icons-png.flaticon.com/512/484/484662.png',
+        iconSize:   [30, 30],
+        iconAnchor: [15, 30]
+      })
+
+      const disponibles = new Set(
+        this.contenants
+          .filter(c => parseFloat(c.poids_actuel_kg) < parseFloat(c.capacite_kg))
+          .map(c => c.Id_emplacement)
+      )
+
+      this.emplacements.filter(e => disponibles.has(e.Id_emplacement)).forEach(e => {
+        const m = L.marker([e.latitude, e.longitude], { icon })
+          .addTo(this.carte)
+          .on('click', () => { this.selection = e })
+        this.marqueurs.push(m)
+      })
+
+      setTimeout(() => { if (this.carte) this.carte.invalidateSize() }, 150)
+    },
+    detruire() {
+      if (this.carte) { this.carte.off(); this.carte.remove(); this.carte = null }
+      this.marqueurs = []; this.selection = null
+      const el = document.getElementById('carte-leaflet')
       if (el) el.innerHTML = ''
     },
-
-    async submit(id) {
+    async remplir(id) {
       const res  = await fetch('http://localhost:3000/remplirpoubelle', {
-        method: 'POST',
-        headers: authHeaders(),
-        body: JSON.stringify({ id })
+        method: 'POST', headers: this.$auth(), body: JSON.stringify({ id })
       })
       const data = await res.json()
       if (data.success) {
@@ -139,47 +197,3 @@ export default {
   }
 }
 </script>
-
-<style scoped>
-@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap');
-
-.map-page { font-family: 'IBM Plex Sans', sans-serif; display: flex; height: calc(100vh - 49px); background: #0f1117; }
-#map { flex: 1; min-width: 0; z-index: 1; }
-
-.sidebar { width: 340px; min-width: 340px; background: #0f1117; border-left: 1px solid #2d3748; overflow-y: auto; padding: 20px; box-sizing: border-box; display: flex; flex-direction: column; gap: 16px; }
-
-.sidebar-placeholder { text-align: center; padding: 60px 20px; color: #4a5568; font-family: 'IBM Plex Mono', monospace; font-size: 0.85rem; line-height: 1.6; }
-.sidebar-placeholder span { display: block; font-size: 2.5rem; margin-bottom: 12px; }
-
-.sidebar-header { display: flex; align-items: flex-start; justify-content: space-between; padding-bottom: 14px; border-bottom: 1px solid #2d3748; }
-.sidebar-header h2 { margin: 0 0 4px; font-size: 1.1rem; font-weight: 600; color: #f7fafc; }
-.sidebar-cp { margin: 0; font-family: 'IBM Plex Mono', monospace; font-size: 0.75rem; color: #718096; }
-
-.close-btn { background: none; border: 1px solid #2d3748; border-radius: 6px; color: #718096; font-size: 0.8rem; padding: 4px 8px; cursor: pointer; transition: color .15s, border-color .15s; }
-.close-btn:hover { color: #e2e8f0; border-color: #4a5568; }
-
-.section-title { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.1em; color: #718096; display: flex; align-items: center; gap: 8px; }
-.dot { width: 7px; height: 7px; border-radius: 50%; display: inline-block; }
-.dot-green { background: #48bb78; box-shadow: 0 0 6px #48bb78; }
-.empty-state { text-align: center; padding: 30px; color: #4a5568; font-size: 0.85rem; font-family: 'IBM Plex Mono', monospace; }
-
-.contenant-card { background: #1a1f2e; border: 1px solid #2d3748; border-radius: 10px; padding: 14px; display: flex; flex-direction: column; gap: 10px; transition: border-color .2s; }
-.contenant-card:hover { border-color: #4a5568; }
-
-.contenant-top { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-.contenant-id { font-family: 'IBM Plex Mono', monospace; font-size: 0.72rem; color: #42b983; background: #111827; border: 1px solid #42b98333; border-radius: 4px; padding: 2px 6px; }
-.contenant-type { font-size: 0.78rem; font-weight: 600; color: #a0aec0; background: #111827; border: 1px solid #2d3748; border-radius: 4px; padding: 2px 8px; }
-.contenant-scelle { font-size: 0.72rem; border-radius: 4px; padding: 2px 7px; margin-left: auto; }
-.scelle-oui { background: #2d2a1a; color: #f6ad55; border: 1px solid #f6ad5533; }
-.scelle-non { background: #1a2535; color: #63b3ed; border: 1px solid #63b3ed33; }
-
-.poids-bar-wrap { display: flex; flex-direction: column; gap: 4px; }
-.poids-bar-label { display: flex; justify-content: space-between; font-family: 'IBM Plex Mono', monospace; font-size: 0.7rem; color: #718096; }
-.poids-pct { color: #a0aec0; }
-.poids-bar-bg { height: 6px; background: #111827; border-radius: 99px; overflow: hidden; }
-.poids-bar-fill { height: 100%; border-radius: 99px; transition: width .4s ease; }
-.bar-ok { background: #48bb78; } .bar-warn { background: #f6ad55; } .bar-danger { background: #fc8181; }
-
-.btn-ajouter { background: #1e2d1f; color: #48bb78; border: 1px solid #48bb7844; border-radius: 7px; padding: 8px; font-family: 'IBM Plex Sans', sans-serif; font-size: 0.82rem; font-weight: 600; cursor: pointer; transition: background .15s; text-align: center; }
-.btn-ajouter:hover { background: #276749; }
-</style>
