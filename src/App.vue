@@ -244,7 +244,7 @@ body { background: #0f1117; color: #e2e8f0; font-family: 'IBM Plex Sans', sans-s
 .entete-stats      { display: flex; gap: 16px; flex-wrap: wrap; }
 
 /* ------------------
-   Stat ( Pour la page des conducteur)
+   Stat
 ------------------ */
 .stat         { text-align: center; background: #1a1f2e; border: 1px solid #2d3748; border-radius: 10px; padding: 12px 20px; }
 .stat-nombre { display: block; font-size: 1.6rem; font-weight: 600; font-family: 'IBM Plex Mono', monospace; color: #f7fafc; }
@@ -279,6 +279,7 @@ body { background: #0f1117; color: #e2e8f0; font-family: 'IBM Plex Sans', sans-s
 .champ-input::placeholder { color: #4a5568; }
 .champ-select option { background: #1a1f2e; }
 .champ-ligne { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.champ-opt   { color: #4a5568; text-transform: none; font-size: 0.75rem; }
 
 /* ------------------
    Boutons
@@ -331,11 +332,11 @@ body { background: #0f1117; color: #e2e8f0; font-family: 'IBM Plex Sans', sans-s
 .carte-item-valeur  { font-size: 0.85rem; color: #a0aec0; margin: 3px 0; }
 .carte-item-coords  { font-family: 'IBM Plex Mono', monospace; font-size: 0.72rem; color: #4a5568; }
 
-// ------------------
-// Couleurs d'identifiant par section
-// ------------------
-.admin       .carte-item-id { color: #f6ad55; background: #2d2a1a; border: 1px solid #f6ad5533; }
-.conducteur  .carte-item-id { color: #63b3ed; background: #1a2535; border: 1px solid #63b3ed33; }
+/* ------------------
+   Couleurs d'identifiant par section
+------------------ */
+.admin        .carte-item-id { color: #f6ad55; background: #2d2a1a; border: 1px solid #f6ad5533; }
+.conducteur   .carte-item-id { color: #63b3ed; background: #1a2535; border: 1px solid #63b3ed33; }
 .gestion-carte .carte-item-id { color: #42b983; background: #1a2d1f; border: 1px solid #42b98333; }
 
 /* ------------------
@@ -424,25 +425,18 @@ section                 { margin-bottom: 40px; }
 .contenant-carte-scelle-ferme  { background: #2d2a1a; color: #f6ad55; border: 1px solid #f6ad5533; }
 .contenant-carte-scelle-ouvert { background: #1a2535; color: #63b3ed; border: 1px solid #63b3ed33; }
 .contenant-carte-barre   { display: flex; flex-direction: column; gap: 4px; }
-.btn-ajouter-poids        { background: #1e2d1f; color: #48bb78; border: 1px solid #48bb7844; border-radius: 7px; padding: 8px; font-family: 'IBM Plex Sans', sans-serif; font-size: 0.82rem; font-weight: 600; cursor: pointer; text-align: center; }
 .btn-signaler             { background: #2d1a1a; color: #fc8181; border: 1px solid #fc818144; border-radius: 7px; padding: 8px; font-family: 'IBM Plex Sans', sans-serif; font-size: 0.82rem; font-weight: 600; cursor: pointer; text-align: center; }
 
 /* ------------------
    Connexion
 ------------------ */
 .boite          { width: 100%; max-width: 400px; background: #1a1f2e; border: 1px solid #2d3748; border-radius: 16px; padding: 40px 36px; display: flex; flex-direction: column; gap: 18px; }
-.boite-entete  { text-align: center; margin-bottom: 8px; }
-.boite-icone   { display: inline-block; font-size: 2rem; background: #111827; border: 1px solid #2d3748; border-radius: 12px; padding: 10px 16px; margin-bottom: 14px; color: #42b983; }
-.boite-titre   { font-size: 1.4rem; font-weight: 600; letter-spacing: -0.03em; color: #f7fafc; }
-.boite-sous-titre { font-size: 0.8rem; color: #718096; font-family: 'IBM Plex Mono', monospace; }
-.champ-opt     { color: #4a5568; text-transform: none; font-size: 0.75rem; }
 
 /* ------------------
    Accueil
 ------------------ */
 .accueil          { max-width: 1100px; margin: 0 auto; padding: 60px 40px; }
 .hero             { text-align: center; padding: 60px 20px 50px; border-bottom: 1px solid #2d3748; margin-bottom: 48px; }
-.hero-badge      { display: inline-block; font-family: 'IBM Plex Mono', monospace; font-size: 0.78rem; color: #42b983; background: #1a2d1f; border: 1px solid #42b98333; border-radius: 99px; padding: 4px 14px; margin-bottom: 24px; }
 .hero-titre      { font-size: 2.8rem; font-weight: 600; letter-spacing: -0.04em; line-height: 1.15; color: #f7fafc; margin-bottom: 16px; }
 .hero-sous-titre { max-width: 520px; margin: 0 auto 32px; font-size: 1rem; color: #718096; line-height: 1.6; }
 .hero-boutons    { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
@@ -453,12 +447,6 @@ section                 { margin-bottom: 40px; }
 .stat-carte-icone { font-size: 1.6rem; background: #111827; border: 1px solid #2d3748; border-radius: 8px; padding: 8px 10px; }
 .stat-carte-valeur { font-size: 1rem; font-weight: 600; color: #f7fafc; font-family: 'IBM Plex Mono', monospace; }
 .stat-carte-label  { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: #718096; }
-.fonctionnalites  { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
-.fonctionnalite   { background: #1a1f2e; border: 1px solid #2d3748; border-radius: 12px; padding: 28px 24px; cursor: pointer; display: flex; flex-direction: column; gap: 10px; }
-.fonctionnalite-icone { font-size: 1.8rem; background: #111827; border: 1px solid #2d3748; border-radius: 8px; padding: 8px 12px; display: inline-block; width: fit-content; }
-.fonctionnalite-titre { font-size: 1rem; font-weight: 600; color: #f7fafc; }
-.fonctionnalite-desc  { font-size: 0.85rem; color: #718096; line-height: 1.55; }
-.fonctionnalite-lien  { font-size: 0.8rem; color: #42b983; font-family: 'IBM Plex Mono', monospace; }
 
 /* ------------------
    Mise en page
