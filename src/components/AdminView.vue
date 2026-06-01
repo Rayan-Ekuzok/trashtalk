@@ -25,7 +25,7 @@
     <div v-else>
 
       <section v-if="enAttente.length > 0">
-        <h2 class="section-titre"><span class="point point-jaune"></span>En attente de traitement</h2>
+        <h2 class="section-titre">En attente de traitement</h2>
         <div class="grille">
           <div v-for="s in enAttente" :key="s.Id_signalement" class="carte-item" :class="{ 'carte-item-traitement': traitement === s.Id_signalement }">
             <div class="carte-item-entete">
@@ -55,7 +55,7 @@
       <div v-else class="vide"><span></span><p>Aucun signalement en attente</p></div>
 
       <section v-if="traites.length > 0">
-        <h2 class="section-titre"><span class="point point-gris"></span>Signalements traités</h2>
+        <h2 class="section-titre">Signalements traités</h2>
         <div class="grille">
           <div v-for="s in traites" :key="s.Id_signalement" class="carte-item carte-item-attenué" :class="s.evalutaion === 1 ? 'carte-item-vert' : 'carte-item-rouge'">
             <div class="carte-item-entete">

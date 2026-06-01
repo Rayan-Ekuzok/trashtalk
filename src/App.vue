@@ -255,7 +255,6 @@ body { background: #0f1117; color: #e2e8f0; font-family: 'IBM Plex Sans', sans-s
 ------------------ */
 .onglets         { display: flex; gap: 8px; margin-bottom: 28px; border-bottom: 1px solid #2d3748; }
 .onglet          { background: none; border: none; border-bottom: 2px solid transparent; padding: 10px 18px; font-family: 'IBM Plex Sans', sans-serif; font-size: 0.88rem; color: #718096; cursor: pointer; margin-bottom: -1px; }
-.onglet-actif   { color: #42b983; border-bottom-color: #42b983; font-weight: 600; }
 
 /* ------------------
    Panneau
@@ -475,4 +474,6 @@ section                 { margin-bottom: 40px; }
 .popup-actions { display: flex; gap: 10px; width: 100%; }
 .popup-textarea { width: 100%; background: #111827; border: 1px solid #2d3748; border-radius: 8px; padding: 10px 12px; color: #e2e8f0; font-family: 'IBM Plex Sans', sans-serif; font-size: 0.88rem; outline: none; resize: vertical; }
 .popup-textarea:focus { border-color: #42b983; }
+
+
 </style>
