@@ -4,7 +4,6 @@
 
     <div class="panneau-lateral">
       <div v-if="!selection" class="panneau-lateral-vide">
-        <span>📍</span>
         <p>Cliquez sur un marqueur pour voir les contenants</p>
       </div>
 
@@ -22,8 +21,8 @@
         <div v-if="!contenantsFiltres.length" class="aucun">Aucun contenant disponible</div>
 
         <div v-for="c in contenantsFiltres" :key="c.Id_contenant" class="contenant-carte">
-          <div class="contenant-carte_entete">
-            <span class="carte-item_id">#{{ c.Id_contenant }}</span>
+          <div class="contenant-carte-entete">
+            <span class="carte-item-id">#{{ c.Id_contenant }}</span>
             <span class="contenant-carte-type">{{ getType(c.Id_type_dechet) }}</span>
             <span class="contenant-carte-scelle" :class="c.scelle ? 'contenant-carte_scelle-ferme' : 'contenant-carte_scelle-ouvert'">
               {{ c.scelle ? 'Scellé' : 'Ouvert' }}
@@ -56,7 +55,7 @@
           <label class="champ-label">Description</label>
           <textarea class="popup-textarea" v-model="signalementTexte" placeholder="Décrivez le problème…" rows="4"></textarea>
         </div>
-        <div class="popup_actions">
+        <div class="popup-actions">
           <button class="btn-rejeter" @click="modalSignalement = false">Annuler</button>
           <button class="btn-valider" :disabled="signalementChargement || !signalementTexte.trim()" @click="envoyerSignalement">
             {{ signalementChargement ? '…' : 'Envoyer' }}

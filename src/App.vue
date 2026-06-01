@@ -1,10 +1,10 @@
 <template>
   <div id="app">
-    <NavBar     :nav="nav" :user="user" @go="go" @logout="onLogout" />
-    <Accueil    :nav="nav" :user="user" @go="go" />
-    <Carte      :nav="nav" :user="user" />
-    <Connexion  :nav="nav" @ok="onLogin" />
-    <Admin      :nav="nav" :user="user" />
+    <NavBar :nav="nav" :user="user" @go="go" @logout="onLogout" />
+    <Accueil :nav="nav" :user="user" @go="go" />
+    <Carte :nav="nav" :user="user" />
+    <Connexion :nav="nav" @ok="onLogin" />
+    <Admin :nav="nav" :user="user" />
     <Conducteur :nav="nav" :user="user" />
     <GestionCarte :nav="nav" :user="user" />
 
@@ -40,7 +40,11 @@ const ACTIVITY_EVENTS = ['mousemove', 'keydown', 'click', 'scroll', 'touchstart'
 // Helpers token
 // ------------------
 function decodeToken(token) {
-  try { return JSON.parse(atob(token.split('.')[1])) } catch { return null }
+  try { 
+    return JSON.parse(atob(token.split('.')[1])) 
+  } catch {
+    return null 
+  }
 }
 function msUntilExpiry(token) {
   const d = decodeToken(token)
@@ -194,7 +198,9 @@ export default {
         } else {
           this.onExpired()
         }
-      } catch { /* serveur injoignable, on continue */ }
+      } catch {
+         //
+        }
     }
   }
 }
@@ -224,9 +230,6 @@ body { background: #0f1117; color: #e2e8f0; font-family: 'IBM Plex Sans', sans-s
   position: sticky; top: 0; z-index: 1000;
 }
 .navbar-lien        { color: #718096; margin-right: 2em; cursor: pointer; font-size: 0.88rem; white-space: nowrap; }
-.navbar-lien-admin { color: #f6ad55; font-weight: 600; }
-.navbar-lien-carte { color: #42b983; font-weight: 600; }
-.navbar-lien-conducteur { color: #63b3ed; font-weight: 600; }
 .navbar-lien-deconnexion { margin-left: auto; margin-right: 0; color: #fc8181; }
 .navbar-utilisateur { margin-left: 16px; font-size: 0.75rem; color: #4a5568; font-family: 'IBM Plex Mono', monospace; }
 
@@ -241,7 +244,7 @@ body { background: #0f1117; color: #e2e8f0; font-family: 'IBM Plex Sans', sans-s
 .entete-stats      { display: flex; gap: 16px; flex-wrap: wrap; }
 
 /* ------------------
-   Statistique
+   Stat ( Pour la page des conducteur)
 ------------------ */
 .stat         { text-align: center; background: #1a1f2e; border: 1px solid #2d3748; border-radius: 10px; padding: 12px 20px; }
 .stat-nombre { display: block; font-size: 1.6rem; font-weight: 600; font-family: 'IBM Plex Mono', monospace; color: #f7fafc; }

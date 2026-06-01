@@ -7,7 +7,7 @@
     <a v-if="user && user.isAdmin" class="navbar-lien navbar-lien-admin" @click="$emit('go', 3)">Admin</a>
     <a v-if="user && user.isAdmin" class="navbar-lien navbar-lien-carte" @click="$emit('go', 5)">Gestion carte</a>
     <a v-if="user" class="navbar-lien navbar-lien-deconnexion" @click="$emit('logout')">Déconnexion</a>
-    <span v-if="user" class="navbar-utilisateur">👤 {{ user.login }}</span>
+    <span v-if="user" class="navbar-utilisateur">{{ user.login }}</span>
   </nav>
 </template>
 

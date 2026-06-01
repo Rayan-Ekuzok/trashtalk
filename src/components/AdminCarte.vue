@@ -3,7 +3,6 @@
 
     <header class="entete">
       <div class="entete_gauche">
-        <span class="entete_icone">🗺</span>
         <div>
           <h1 class="entete_titre">Gestion de la carte</h1>
           <p class="entete_sous-titre">Emplacements · Contenants · Assignations</p>
@@ -21,19 +20,19 @@
     <div v-if="actif === 'emp'" class="deux-colonnes">
 
       <div class="panneau">
-        <h2 class="panneau_titre">➕ Nouvel emplacement</h2>
-        <div class="champ"><label class="champ_label">Libellé</label><input class="champ_input" v-model="nouvelEmp.libelle" placeholder="Ex : Castellane" /></div>
-        <div class="champ"><label class="champ_label">Code postal</label><input class="champ_input" v-model="nouvelEmp.cp" placeholder="13006" maxlength="5" /></div>
+        <h2 class="panneau-titre">Nouvel emplacement</h2>
+        <div class="champ"><label class="champ-label">Libellé</label><input class="champ_input" v-model="nouvelEmp.libelle" placeholder="Ex : Castellane" /></div>
+        <div class="champ"><label class="champ-label">Code postal</label><input class="champ_input" v-model="nouvelEmp.cp" placeholder="13006" maxlength="5" /></div>
         <div class="champ-ligne">
-          <div class="champ"><label class="champ_label">Latitude</label><input class="champ_input" v-model="nouvelEmp.lat" placeholder="43.2850" type="number" step="0.0001" /></div>
-          <div class="champ"><label class="champ_label">Longitude</label><input class="champ_input" v-model="nouvelEmp.lng" placeholder="5.3800" type="number" step="0.0001" /></div>
+          <div class="champ"><label class="champ-label">Latitude</label><input class="champ_input" v-model="nouvelEmp.lat" placeholder="43.2850" type="number" step="0.0001" /></div>
+          <div class="champ"><label class="champ-label">Longitude</label><input class="champ_input" v-model="nouvelEmp.lng" placeholder="5.3800" type="number" step="0.0001" /></div>
         </div>
         <button class="btn-principal" :disabled="empChargement" @click="ajouterEmp">{{ empChargement ? 'Ajout…' : "Ajouter l'emplacement" }}</button>
         <p v-if="empMsg" class="message" :class="empMsg.ok ? 'message-succes' : 'message-erreur'">{{ empMsg.txt }}</p>
       </div>
 
       <div class="panneau">
-        <h2 class="panneau_titre">📍 Emplacements existants</h2>
+        <h2 class="panneau-titre">Emplacements existants</h2>
         <div v-if="!emplacements.length" class="aucun">Aucun emplacement</div>
         <div class="liste-elements">
           <div v-for="e in emplacements" :key="e.Id_emplacement" class="element-ligne">
@@ -53,9 +52,9 @@
     <div v-if="actif === 'cont'" class="deux-colonnes">
 
       <div class="panneau">
-        <h2 class="panneau_titre">➕ Nouveau contenant</h2>
-        <div class="champ"><label class="champ_label">Capacité (kg)</label><input class="champ_input" v-model="nouveauCont.cap" placeholder="100" type="number" min="1" /></div>
-        <div class="champ"><label class="champ_label">Poids actuel (kg)</label><input class="champ_input" v-model="nouveauCont.poids" placeholder="0" type="number" min="0" /></div>
+        <h2 class="panneau-titre">Nouveau contenant</h2>
+        <div class="champ"><label class="champ-label">Capacité (kg)</label><input class="champ_input" v-model="nouveauCont.cap" placeholder="100" type="number" min="1" /></div>
+        <div class="champ"><label class="champ-label">Poids actuel (kg)</label><input class="champ_input" v-model="nouveauCont.poids" placeholder="0" type="number" min="0" /></div>
         <div class="champ">
           <label class="champ_label">Type de déchet</label>
           <select class="champ_select" v-model="nouveauCont.typeId">
@@ -73,7 +72,7 @@
         <div class="champ">
           <label class="champ_label">Scellé</label>
           <button class="btn-bascule" :class="nouveauCont.scelle ? 'btn-bascule-actif' : 'btn-bascule-inactif'" @click="nouveauCont.scelle = !nouveauCont.scelle">
-            {{ nouveauCont.scelle ? '🔒 Oui' : '🔓 Non' }}
+            {{ nouveauCont.scelle ? 'Oui' : 'Non' }}
           </button>
         </div>
         <button class="btn-principal" :disabled="contChargement" @click="ajouterCont">{{ contChargement ? 'Ajout…' : 'Ajouter le contenant' }}</button>
@@ -133,7 +132,7 @@
       </div>
 
       <div class="panneau">
-        <h2 class="panneau_titre">📊 Synthèse par emplacement</h2>
+        <h2 class="panneau_titre">Synthèse par emplacement</h2>
         <div class="synthese-liste">
           <div v-for="e in emplacements" :key="e.Id_emplacement" class="synthese-ligne">
             <div class="synthese-entete">
@@ -162,9 +161,9 @@ export default {
     return {
       actif: 'emp',
       onglets: [
-        { id: 'emp',    label: '📍 Emplacements' },
-        { id: 'cont',   label: '🗑 Contenants' },
-        { id: 'assign', label: '🔗 Assignation' }
+        { id: 'emp',    label: 'Emplacements' },
+        { id: 'cont',   label: 'Contenants' },
+        { id: 'assign', label: 'Assignation' }
       ],
       emplacements: [], contenants: [], types: [],
       nouvelEmp:    { libelle: '', cp: '', lat: '', lng: '' },

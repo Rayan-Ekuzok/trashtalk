@@ -3,16 +3,24 @@
 
     <header class="entete">
       <div class="entete-gauche">
-        <span class="entete-icone">🚛</span>
         <div>
           <h1 class="entete-titre">{{ user.isAdmin ? 'Tous les transferts' : 'Mes Transferts' }}</h1>
           <p class="entete-sous-titre">{{ user.isAdmin ? 'Vue administrateur — toutes les missions' : user.login + ' — vos affectations' }}</p>
         </div>
       </div>
-      <div class="entete_stats">
-        <div class="stat"><span class="stat-nombre">{{ enCours.length }}</span><span class="stat-libelle">En cours</span></div>
-        <div class="stat"><span class="stat-nombre">{{ enAttente.length }}</span><span class="stat-libelle">En attente</span></div>
-        <div class="stat"><span class="stat-nombre">{{ termines.length }}</span><span class="stat-libelle">Terminés</span></div>
+      <div class="entete-stats">
+        <div class="stat">
+          <span class="stat-nombre">{{ enCours.length }}</span>
+          <span class="stat-libelle">En cours</span>
+        </div>
+        <div class="stat">
+          <span class="stat-nombre">{{ enAttente.length }}</span>
+          <span class="stat-libelle">En attente</span>
+        </div>
+        <div class="stat">
+          <span class="stat-nombre">{{ termines.length }}</span>
+          <span class="stat-libelle">Terminés</span>
+        </div>
       </div>
     </header>
 
@@ -31,9 +39,9 @@
               <span class="badge badge-vert">{{ t.statut }}</span>
               <span v-if="user.isAdmin && t.conducteur_login" class="badge-conducteur">🧑 {{ t.conducteur_login }}</span>
             </div>
-            <div class="carte-item-section"><p class="carte-item_section-label">🗓 Dates</p><p class="carte-item_valeur">Demande : {{ formater(t.date_demande) }}</p><p class="carte-item_valeur">Début : {{ formater(t.date_debut) }}</p><p class="carte-item_valeur">Fin : {{ t.date_fin ? formater(t.date_fin) : '—' }}</p></div>
-            <div class="carte-item-section"><p class="carte-item_section-label">🚚 Véhicule</p><p class="carte-item_valeur"><b>{{ t.type_vehicule }}</b> — matricule #{{ t.matricule }}</p><p class="carte-item_valeur">Capacité : {{ t.capacite_kg }} kg / {{ t.capacite_m2 }} m²</p></div>
-            <div class="carte-item-section"><p class="carte-item_section-label">📍 Destination</p><p class="carte-item_valeur"><b>{{ t.centre_ville }}</b></p><p class="carte-item_valeur">{{ t.centre_adresse }}, {{ t.centre_code_postal }}</p><p class="carte-item_coords">{{ t.centre_latitude }}, {{ t.centre_longitude }}</p></div>
+            <div class="carte-item-section"><p class="carte-item-section-label">🗓 Dates</p><p class="carte-item-valeur">Demande : {{ formater(t.date_demande) }}</p><p class="carte-item-valeur">Début : {{ formater(t.date_debut) }}</p><p class="carte-item-valeur">Fin : {{ t.date_fin ? formater(t.date_fin) : '—' }}</p></div>
+            <div class="carte-item-section"><p class="carte-item-section-label">🚚 Véhicule</p><p class="carte-item-valeur"><b>{{ t.type_vehicule }}</b> — matricule #{{ t.matricule }}</p><p class="carte-item-valeur">Capacité : {{ t.capacite_kg }} kg / {{ t.capacite_m2 }} m²</p></div>
+            <div class="carte-item-section"><p class="carte-item-section-label">📍 Destination</p><p class="carte-item-valeur"><b>{{ t.centre_ville }}</b></p><p class="carte-item-valeur">{{ t.centre_adresse }}, {{ t.centre_code_postal }}</p><p class="carte-item-coords">{{ t.centre_latitude }}, {{ t.centre_longitude }}</p></div>
           </div>
         </div>
       </section>
@@ -42,8 +50,8 @@
         <h2 class="section-titre"><span class="point point-jaune"></span>En attente</h2>
         <div class="grille">
           <div v-for="t in enAttente" :key="t.Id_transfert" class="carte-item carte-item-jaune">
-            <div class="carte-item_entete">
-              <span class="carte-item_id">#{{ t.Id_transfert }}</span>
+            <div class="carte-item-entete">
+              <span class="carte-item-id">#{{ t.Id_transfert }}</span>
               <span class="badge badge-jaune">{{ t.statut }}</span>
               <span v-if="user.isAdmin && t.conducteur_login" class="badge-conducteur">🧑 {{ t.conducteur_login }}</span>
             </div>
@@ -58,8 +66,8 @@
         <h2 class="section-titre"><span class="point point-gris"></span>Terminés</h2>
         <div class="grille">
           <div v-for="t in termines" :key="t.Id_transfert" class="carte-item carte-item-gris">
-            <div class="carte-item_entete">
-              <span class="carte-item_id">#{{ t.Id_transfert }}</span>
+            <div class="carte-item-entete">
+              <span class="carte-item-id">#{{ t.Id_transfert }}</span>
               <span class="badge badge-gris">{{ t.statut }}</span>
               <span v-if="user.isAdmin && t.conducteur_login" class="badge-conducteur">🧑 {{ t.conducteur_login }}</span>
             </div>

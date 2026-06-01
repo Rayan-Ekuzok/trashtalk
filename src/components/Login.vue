@@ -2,22 +2,20 @@
   <div v-if="nav === 2" class="page-center">
     <div class="boite">
       <div class="boite_entete">
-        <span class="boite_icone">{{ estInscription ? '✦' : '⬡' }}</span>
         <h1 class="boite_titre">{{ estInscription ? 'Créer un compte' : 'Connexion' }}</h1>
-        <p class="boite_sous-titre">{{ estInscription ? 'Rejoindre TrashTalk' : 'Bon retour parmi nous' }}</p>
       </div>
 
       <div class="champ">
-        <label class="champ_label">Login</label>
-        <input class="champ_input" v-model="login" placeholder="Votre identifiant" autocomplete="username" />
+        <label class="champ-label">Login</label>
+        <input class="champ-input" v-model="login" placeholder="Votre identifiant" autocomplete="username" />
       </div>
       <div class="champ">
-        <label class="champ_label">Mot de passe</label>
-        <input class="champ_input" v-model="pwd" type="password" placeholder="••••••••" autocomplete="current-password" />
+        <label class="champ-label">Mot de passe</label>
+        <input class="champ-input" v-model="pwd" type="password" placeholder="••••••••" autocomplete="current-password" />
       </div>
       <div v-if="estInscription" class="champ">
-        <label class="champ_label">Avatar <span class="champ_opt">(optionnel)</span></label>
-        <input class="champ_input" v-model="icon" placeholder="URL d'une image" />
+        <label class="champ-label">Avatar <span class="champ-opt">(optionnel)</span></label>
+        <input class="champ-input" v-model="icon" placeholder="URL d'une image" />
       </div>
 
       <button class="btn-principal" :disabled="chargement" @click="soumettre">

@@ -2,21 +2,20 @@
   <div v-if="nav === 3 && user && user.isAdmin" class="admin page">
 
     <header class="entete">
-      <div class="entete_gauche">
-        <span class="entete_icone">⚠</span>
+      <div class="entete-gauche">
         <div>
-          <h1 class="entete_titre">Panneau Admin</h1>
-          <p class="entete_sous-titre">Gestion des signalements</p>
+          <h1 class="entete-titre">Panneau Admin</h1>
+          <p class="entete-sous-titre">Gestion des signalements</p>
         </div>
       </div>
-      <div class="entete_stats">
+      <div class="entete-stats">
         <div class="stat">
-          <span class="stat_nombre">{{ enAttente.length }}</span>
-          <span class="stat_libelle">En attente</span>
+          <span class="stat-nombre">{{ enAttente.length }}</span>
+          <span class="stat-libelle">En attente</span>
         </div>
         <div class="stat">
-          <span class="stat_nombre">{{ traites.length }}</span>
-          <span class="stat_libelle">Traités</span>
+          <span class="stat-nombre">{{ traites.length }}</span>
+          <span class="stat-libelle">Traités</span>
         </div>
       </div>
     </header>
@@ -29,15 +28,14 @@
         <h2 class="section-titre"><span class="point point-jaune"></span>En attente de traitement</h2>
         <div class="grille">
           <div v-for="s in enAttente" :key="s.Id_signalement" class="carte-item" :class="{ 'carte-item-traitement': traitement === s.Id_signalement }">
-            <div class="carte-item_entete">
-              <span class="carte-item_id">#{{ s.Id_signalement }}</span>
-              <span class="carte-item_date">{{ formater(s.date_) }}</span>
+            <div class="carte-item-entete">
+              <span class="carte-item-id">#{{ s.Id_signalement }}</span>
+              <span class="carte-item-date">{{ formater(s.date_) }}</span>
             </div>
-            <p class="carte-item_texte">{{ s.text }}</p>
-            <div class="carte-item_meta">
-              <div class="carte-item_ligne"><span>📍</span><span>{{ s.emplacement_libelle }} ({{ s.code_postal }})</span></div>
-              <div class="carte-item_ligne">
-                <span>👤</span>
+            <p class="carte-item-texte">{{ s.text }}</p>
+            <div class="carte-item-meta">
+              <div class="carte-item-ligne"><span>{{ s.emplacement_libelle }} ({{ s.code_postal }})</span></div>
+              <div class="carte-item-ligne">
                 <span>
                   {{ s.citoyen_login }}
                   <span class="badge-avertissement" :class="{ 'badge-avertissement-critique': s.nb_avertissement >= 4 }">{{ s.nb_avertissement }}/5 avert.</span>
@@ -45,7 +43,7 @@
                 </span>
               </div>
             </div>
-            <div class="carte-item_actions">
+            <div class="carte-item-actions">
               <button class="btn-valider" :disabled="traitement === s.Id_signalement" @click="valider(s)">✔ Valider</button>
               <button class="btn-rejeter" :disabled="traitement === s.Id_signalement" @click="rejeter(s)">✘ Rejeter</button>
             </div>
@@ -54,21 +52,23 @@
         </div>
       </section>
 
-      <div v-else class="vide"><span>✅</span><p>Aucun signalement en attente</p></div>
+      <div v-else class="vide"><span></span><p>Aucun signalement en attente</p></div>
 
       <section v-if="traites.length > 0">
         <h2 class="section-titre"><span class="point point-gris"></span>Signalements traités</h2>
         <div class="grille">
           <div v-for="s in traites" :key="s.Id_signalement" class="carte-item carte-item-attenué" :class="s.evalutaion === 1 ? 'carte-item-vert' : 'carte-item-rouge'">
-            <div class="carte-item_entete">
-              <span class="carte-item_id">#{{ s.Id_signalement }}</span>
+            <div class="carte-item-entete">
+              <span class="carte-item-id">#{{ s.Id_signalement }}</span>
               <span class="badge" :class="s.evalutaion === 1 ? 'badge-valide' : 'badge-rejeté'">{{ s.evalutaion === 1 ? '✔ Validé' : '✘ Rejeté' }}</span>
-              <span class="carte-item_date">{{ formater(s.date_) }}</span>
+              <span class="carte-item-date">{{ formater(s.date_) }}</span>
             </div>
-            <p class="carte-item_texte carte-item_texte-attenué">{{ s.text }}</p>
-            <div class="carte-item_meta">
-              <div class="carte-item_ligne"><span>📍</span><span>{{ s.emplacement_libelle }}</span></div>
-              <div class="carte-item_ligne">
+            <p class="carte-item-texte carte-item-texte-attenué">{{ s.text }}</p>
+            <div class="carte-item-meta">
+              <div class="carte-item-ligne">
+                <span>{{ s.emplacement_libelle }}</span>
+              </div>
+              <div class="carte-item-ligne">
                 <span>👤</span>
                 <span>
                   {{ s.citoyen_login }}
