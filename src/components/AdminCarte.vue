@@ -185,9 +185,9 @@ export default {
   methods: {
     async chargerTout() {
       const [e, c, t] = await Promise.all([
-        fetch('http://localhost:3000/emplacement').then(r => r.json()),
-        fetch('http://localhost:3000/contenant').then(r => r.json()),
-        fetch('http://localhost:3000/type_dechet').then(r => r.json())
+        fetch('http://fellous.alwaysdata.net/emplacement').then(r => r.json()),
+        fetch('http://fellous.alwaysdata.net/contenant').then(r => r.json()),
+        fetch('http://fellous.alwaysdata.net/type_dechet').then(r => r.json())
       ])
       this.emplacements = Array.isArray(e) ? e : []
       this.contenants   = Array.isArray(c) ? c : []
@@ -203,7 +203,7 @@ export default {
       if (!libelle || !cp || !lat || !lng) { this.empMsg = { ok: false, txt: 'Tous les champs sont obligatoires' }; return }
       this.empChargement = true; this.empMsg = null
       try {
-        const res  = await fetch('http://localhost:3000/emplacement/ajouter', { method: 'POST', headers: this.$auth(), body: JSON.stringify({ libelle, code_postal: cp, latitude: parseFloat(lat), longitude: parseFloat(lng) }) })
+        const res  = await fetch('http://fellous.alwaysdata.net/emplacement/ajouter', { method: 'POST', headers: this.$auth(), body: JSON.stringify({ libelle, code_postal: cp, latitude: parseFloat(lat), longitude: parseFloat(lng) }) })
         const data = await res.json()
         if (data.success) { this.empMsg = { ok: true, txt: `Emplacement "${libelle}" ajouté ✔` }; this.nouvelEmp = { libelle: '', cp: '', lat: '', lng: '' }; await this.chargerTout() }
         else this.empMsg = { ok: false, txt: data.message || 'Erreur' }
@@ -216,7 +216,7 @@ export default {
       if (!cap || !typeId || !empId) { this.contMsg = { ok: false, txt: 'Capacité, type et emplacement sont obligatoires' }; return }
       this.contChargement = true; this.contMsg = null
       try {
-        const res  = await fetch('http://localhost:3000/contenant/ajouter', { method: 'POST', headers: this.$auth(), body: JSON.stringify({ capacite_kg: parseInt(cap), poids_actuel_kg: parseFloat(poids) || 0, Id_type_dechet: parseInt(typeId), Id_emplacement: parseInt(empId), scelle: scelle ? 1 : 0 }) })
+        const res  = await fetch('http://fellous.alwaysdata.net/contenant/ajouter', { method: 'POST', headers: this.$auth(), body: JSON.stringify({ capacite_kg: parseInt(cap), poids_actuel_kg: parseFloat(poids) || 0, Id_type_dechet: parseInt(typeId), Id_emplacement: parseInt(empId), scelle: scelle ? 1 : 0 }) })
         const data = await res.json()
         if (data.success) { this.contMsg = { ok: true, txt: `Contenant #${data.id} ajouté ✔` }; this.nouveauCont = { cap: '', poids: 0, typeId: '', empId: '', scelle: false }; await this.chargerTout() }
         else this.contMsg = { ok: false, txt: data.message || 'Erreur' }
@@ -229,7 +229,7 @@ export default {
       if (!contId || !empId) return
       this.assignChargement = true; this.assignMsg = null
       try {
-        const res  = await fetch('http://localhost:3000/contenant/assigner', { method: 'POST', headers: this.$auth(), body: JSON.stringify({ Id_contenant: parseInt(contId), Id_emplacement: parseInt(empId) }) })
+        const res  = await fetch('http://fellous.alwaysdata.net/contenant/assigner', { method: 'POST', headers: this.$auth(), body: JSON.stringify({ Id_contenant: parseInt(contId), Id_emplacement: parseInt(empId) }) })
         const data = await res.json()
         if (data.success) {
           const e = this.emplacements.find(e => e.Id_emplacement === parseInt(empId))
