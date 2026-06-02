@@ -353,14 +353,10 @@ body { background: #0f1117; color: #e2e8f0; font-family: 'IBM Plex Sans', sans-s
 .badge-conducteur       { font-family: 'IBM Plex Mono', monospace; font-size: 0.7rem; background: #1e2330; color: #a0aec0; border: 1px solid #2d3748; border-radius: 4px; padding: 2px 7px; margin-left: auto; }
 
 /* ------------------
-   Titre de section et points
+   Titre de section 
 ------------------ */
 .section-titre          { font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.1em; color: #718096; display: flex; align-items: center; gap: 8px; margin-bottom: 16px; }
 section                 { margin-bottom: 40px; }
-.point                  { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
-.point-vert            { background: #48bb78; }
-.point-jaune           { background: #f6ad55; }
-.point-gris            { background: #4a5568; }
 
 /* ------------------
    Liste d'éléments
@@ -470,7 +466,7 @@ section                 { margin-bottom: 40px; }
 .popup-icone   { font-size: 2.5rem; background: #111827; border: 1px solid #2d3748; border-radius: 12px; padding: 10px 16px; }
 .popup-titre   { font-size: 1.2rem; font-weight: 600; color: #f7fafc; }
 .popup-texte   { font-size: 0.85rem; color: #718096; line-height: 1.5; }
-.popup-bouton  { background: #276749; color: #c6f6d5; border: none; border-radius: 8px; padding: 10px 24px; font-size: 0.88rem; font-weight: 600; cursor: pointer; margin-top: 4px; }
+.popup > button  { background: #276749; color: #c6f6d5; border: none; border-radius: 8px; padding: 10px 24px; font-size: 0.88rem; font-weight: 600; cursor: pointer; margin-top: 4px; }
 .popup-actions { display: flex; gap: 10px; width: 100%; }
 .popup-textarea { width: 100%; background: #111827; border: 1px solid #2d3748; border-radius: 8px; padding: 10px 12px; color: #e2e8f0; font-family: 'IBM Plex Sans', sans-serif; font-size: 0.88rem; outline: none; resize: vertical; }
 .popup-textarea:focus { border-color: #42b983; }
