@@ -112,7 +112,9 @@ export default {
       this.signalementChargement = true
       this.signalementMsg = null
       try {
-        const res  = await fetch('http://fellous.alwaysdata.net/signalement/creer', {
+        //const res  = await fetch('http://fellous.alwaysdata.net/signalement/creer', {
+        const res  = await fetch('http://localhost:3000/signalement/creer', {
+
           method: 'POST',
           headers: this.$auth(),
           body: JSON.stringify({ Id_emplacement: this.signalementContenantId, text: this.signalementTexte })
@@ -130,9 +132,12 @@ export default {
     },
     async chargerDonnees() {
       const [e, c, t] = await Promise.all([
-        fetch('http://fellous.alwaysdata.net/emplacement').then(r => r.json()),
-        fetch('http://fellous.alwaysdata.net/contenant', { headers: this.$auth() }).then(r => r.json()),
-        fetch('http://fellous.alwaysdata.net/type_dechet').then(r => r.json())
+        fetch('http://localhost:3000/emplacement').then(r => r.json()),
+        fetch('http://localhost:3000/contenant', { headers: this.$auth() }).then(r => r.json()),
+        fetch('http://localhost:3000/type_dechet').then(r => r.json())
+        // fetch('http://fellous.alwaysdata.net/emplacement').then(r => r.json()),
+        // fetch('http://fellous.alwaysdata.net/contenant', { headers: this.$auth() }).then(r => r.json()),
+        // fetch('http://fellous.alwaysdata.net/type_dechet').then(r => r.json())
       ])
       this.emplacements = Array.isArray(e) ? e : []
       this.contenants   = Array.isArray(c) ? c : []
@@ -184,7 +189,9 @@ export default {
       if (el) el.innerHTML = ''
     },
     async remplir(id) {
-      const res  = await fetch('http://fellous.alwaysdata.net/remplirpoubelle', {
+      //const res  = await fetch('http://fellous.alwaysdata.net/remplirpoubelle', {
+      const res  = await fetch('http://localhost:3000/remplirpoubelle', {
+
         method: 'POST', headers: this.$auth(), body: JSON.stringify({ id })
       })
       const data = await res.json()

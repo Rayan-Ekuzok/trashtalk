@@ -45,6 +45,8 @@ export default {
       this.chargement = true; this.msg = ''
       try {
         const url  = this.estInscription ? 'http://fellous.alwaysdata.net/register' : 'http://fellous.alwaysdata.net/login'
+        //const url  = this.estInscription ? 'http://localhost:3000/register' : 'http://localhost:3000/login'
+
         const body = this.estInscription
           ? { login: this.login, password: this.pwd, icon: this.icon }
           : { login: this.login, password: this.pwd }
