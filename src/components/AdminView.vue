@@ -103,8 +103,8 @@ export default {
     async charger() {
       this.chargement = true
       try {
-        //const res = await fetch('http://fellous.alwaysdata.net/contenant/assigner', { headers: this.$auth() })
-        const res = await fetch('http://localhost:3000/signalement', { headers: this.$auth() })
+        const res = await fetch('https://fellous.alwaysdata.net/contenant/assigner', { headers: this.$auth() })
+        //const res = await fetch('http://localhost:3000/signalement', { headers: this.$auth() })
 
         this.signalements = await res.json()
       } catch(e) { console.error(e) }
@@ -113,8 +113,8 @@ export default {
     async valider(s) {
       this.traitement = s.Id_signalement
       try {
-        //const res  = await fetch('http://fellous.alwaysdata.net/contenant/assigner', { method: 'POST', headers: this.$auth(), body: JSON.stringify({ id_signalement: s.Id_signalement }) })
-        const res  = await fetch('http://localhost:3000/signalement/valider', { method: 'POST', headers: this.$auth(), body: JSON.stringify({ id_signalement: s.Id_signalement }) })
+        const res  = await fetch('https://fellous.alwaysdata.net/contenant/assigner', { method: 'POST', headers: this.$auth(), body: JSON.stringify({ id_signalement: s.Id_signalement }) })
+        //const res  = await fetch('http://localhost:3000/signalement/valider', { method: 'POST', headers: this.$auth(), body: JSON.stringify({ id_signalement: s.Id_signalement }) })
 
         const data = await res.json()
         if (data.success) {
@@ -128,8 +128,8 @@ export default {
     async rejeter(s) {
       this.traitement = s.Id_signalement
       try {
-        //const res  = await fetch('http://fellous.alwaysdata.net/contenant/assigner', { method: 'POST', headers: this.$auth(), body: JSON.stringify({ id_signalement: s.Id_signalement }) })
-        const res  = await fetch('http://localhost:3000/signalement/rejeter', { method: 'POST', headers: this.$auth(), body: JSON.stringify({ id_signalement: s.Id_signalement }) })
+        const res  = await fetch('https://fellous.alwaysdata.net/contenant/assigner', { method: 'POST', headers: this.$auth(), body: JSON.stringify({ id_signalement: s.Id_signalement }) })
+        //const res  = await fetch('http://localhost:3000/signalement/rejeter', { method: 'POST', headers: this.$auth(), body: JSON.stringify({ id_signalement: s.Id_signalement }) })
 
         const data = await res.json()
         if (data.success) {

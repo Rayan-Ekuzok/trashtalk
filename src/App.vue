@@ -188,9 +188,9 @@ export default {
       const token = getToken()
       if (!token) return
       try {
-        //const res  = await fetch('http://fellous.alwaysdata.net/auth/refresh', {
+        const res  = await fetch('https://fellous.alwaysdata.net/auth/refresh', {
 
-        const res  = await fetch('http://localhost:3000/auth/refresh', {
+        //const res  = await fetch('http://localhost:3000/auth/refresh', {
           method: 'POST',
           headers: authHeaders()
         })

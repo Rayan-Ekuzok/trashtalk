@@ -108,10 +108,10 @@ export default {
       this.chargement = true; this.erreur = null; this.transferts = []
       try {
         const url  = this.user.isAdmin
-          // ? 'http://fellous.alwaysdata.net/transferts/all'
-          // : `http://fellous.alwaysdata.net/conducteur/transferts/${this.user.Id_utilisateur}`
-          ? 'http://localhost:3000/transferts/all'
-          : `http://localhost:3000/conducteur/transferts/${this.user.Id_utilisateur}`
+           ? 'https://fellous.alwaysdata.net/transferts/all'
+           : `https://fellous.alwaysdata.net/conducteur/transferts/${this.user.Id_utilisateur}`
+          //? 'http://localhost:3000/transferts/all'
+          //: `http://localhost:3000/conducteur/transferts/${this.user.Id_utilisateur}`
         const res  = await fetch(url, { headers: this.$auth() })
         const data = await res.json()
         if (Array.isArray(data)) this.transferts = data
