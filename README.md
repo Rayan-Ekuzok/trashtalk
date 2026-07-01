@@ -14,7 +14,7 @@ Interface web de l'application **TrashTalk**, une plateforme de gestion des déc
 | | URL |
 |---|---|
 | **Client Vue.js** | [https://rayanfellous.alwaysdata.net](https://rayanfellous.alwaysdata.net) |
-| **Serveur API** | [http://fellous.alwaysdata.net](http://fellous.alwaysdata.net) |
+| **Serveur API** | [https://fellous.alwaysdata.net](https://fellous.alwaysdata.net) |
 
 ---
 
@@ -55,7 +55,7 @@ npm install
 npm run dev
 ```
 
-Par défaut, le client pointe vers le serveur en production `http://fellous.alwaysdata.net`.  
+Par défaut, le client pointe vers le serveur en production `https://fellous.alwaysdata.net`.  
 Pour pointer vers un serveur local, remplacez les URLs dans les composants par `http://localhost:3000`.
 
 ---
@@ -75,6 +75,18 @@ Pour pointer vers un serveur local, remplacez les URLs dans les composants par `
 | **Citoyen** | Carte, signalement de problèmes |
 | **Conducteur** | Carte + vue de ses transferts de collecte |
 | **Admin** | Tout — modération, gestion carte, tous les transferts |
+
+---
+
+## 🧪 Comptes de test
+
+Des comptes préconfigurés sont disponibles pour tester les différentes fonctionnalités de la démo :
+
+| Rôle | Identifiant | Mot de passe |
+|---|---|---|
+| **Administrateur** | `Joe` | `JeSuisJoe` |
+| **Conducteur** | `Simon` | `JeSuisSimon` |
+| **Utilisateur** | `Nathan` | `JeSuisNathan` |
 
 ---
 
